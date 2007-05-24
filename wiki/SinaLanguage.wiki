@@ -1,0 +1,28 @@
+#summary Defines the sina programming language, a toy programming language
+
+= Introduction =
+
+The Sina programming language uses reverse polish notation (RPN) to keep syntax as simple as possible. At the same time it also adds notation for creating lists and blocks. I won't be implementing namespaces (this is the feature, or lack thereof, that makes it a toy programming language in my eyes).
+
+Sina is a typed language. Each piece of memory has an associated type.
+
+= Types =
+
+  * INT -- an integer (Platforms notion of an int in C)
+  * REAL -- a floating point number (Platforms notion of a double in C)
+  * NODE -- a node in a list
+  * BLOCK -- the head of a block (references a list node)
+  
+
+"Strings" are represented as lists of INTs
+
+
+= Syntax =
+
+A Sina program consists of a sequence of literals, words, lists and blocks.
+
+== Literals ==
+
+  * An integer
+
+= Semantics =
