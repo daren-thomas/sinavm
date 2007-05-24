@@ -4,7 +4,7 @@
 
 The main goal of this work is to implement a functioning concurrent garbage collector (GC) modeled after the [http://www.cs.utexas.edu/users/EWD/transcriptions/EWD04xx/EWD492.html algorithm proposed by Dijkstra]. A secondary goal is to compare the GC with the two-space algorithm for efficiency.
 
-A byproduct of this effort will be a (toy) programming language and a runtime to go with it (the sinavm).
+A byproduct of this effort will be a [SinaLanguage (toy) programming language] and a runtime to go with it (the SinaVM).
 
 = Context =
 
