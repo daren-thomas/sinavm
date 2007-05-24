@@ -4,8 +4,9 @@
 
 The main goal of this work is to implement a functioning concurrent garbage collector (GC) modeled after the algorithm proposed by Dijkstra. A secondary goal is to compare the GC with the two-space algorithm for efficiency.
 
-= Motivation =
+= Context =
 
+This project is a school project I am writing as part of my studies at the [http://www.hsz-t.ch Hochschule für Technik Zürich]. I will be finished before the end of November 2007. Please don't contribute code before that as that could be seen as cheating :)
 
 = Details =
 
