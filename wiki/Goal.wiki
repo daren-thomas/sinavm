@@ -2,7 +2,7 @@
 
 = Introduction =
 
-The main goal of this work is to implement a functioning concurrent garbage collector (GC) modeled after the algorithm proposed by Dijkstra. A secondary goal is to compare the GC with the two-space algorithm for efficiency.
+The main goal of this work is to implement a functioning concurrent garbage collector (GC) modeled after the [http://www.cs.utexas.edu/users/EWD/transcriptions/EWD04xx/EWD492.html algorithm proposed by Dijkstra]. A secondary goal is to compare the GC with the two-space algorithm for efficiency.
 
 = Context =
 
