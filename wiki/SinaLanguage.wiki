@@ -4,7 +4,7 @@
 
 The Sina programming language uses reverse polish notation (RPN) to keep syntax as simple as possible. At the same time it also adds notation for creating lists and blocks. I won't be implementing namespaces (this is the feature, or lack thereof, that makes it a toy programming language in my eyes).
 
-Sina is a typed language. Each piece of memory has an associated type.
+Sina is a typed language. Each piece of memory (object) has an associated type.
 
 = Types =
 
@@ -12,9 +12,11 @@ Sina is a typed language. Each piece of memory has an associated type.
   * REAL -- a floating point number (Platforms notion of a double in C)
   * NODE -- a node in a list
   * BLOCK -- the head of a block (references a list node)
+  * NATIVE -- a pointer to native code (for built in functions)
+  * SYMBOL -- a symbol in the program. Identifiers are translated into symbols. Symbols can be dynamically bound to other objects.
   
 
-"Strings" are represented as lists of INTs
+"Strings" are represented as lists of INTs. There are built in functions to output a "string" and to read a string from input into a list.
 
 
 = Syntax =
@@ -24,5 +26,17 @@ A Sina program consists of a sequence of literals, words, lists and blocks.
 == Literals ==
 
   * An integer
+  * string literals are converted to lists of integers
 
 = Semantics =
+
+Parsing Sina source code results in a list of typed "objects". The [SinaVM] then executes the program by evaluating each object in the list according to its type. The default evaluation of an object is to push it onto the data stack (DS).
+
+Evaluation of a SYMBOL type is special: A symbol is evaluated by looking up the object it refers to and evaluating that instead. Evaluating a symbol that is not bound to an object is an error. This mode of evaluating a symbol can be suppressed by "escaping" the symbol (prefixing the symbol with a colon). This pushes the symbol itself onto the DS.
+
+= Example program =
+
+{{
+"hello, what is your name?" read-line :name bind-symbol
+"hello, " name cat-list print-string
+}}
