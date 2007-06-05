@@ -16,7 +16,7 @@ To achieve these goals, I will need to:
 
   * set up a project home (source control, status, 
   * define a language and it's runtime to work in conjunction with the GC.
-  * define a problem to be solved by this language, with which I can test the two algorithms.
+  * [CesarShift define a problem to be solved by this language], with which I can test the two algorithms.
   * implement the (toy) language
     * implement a parser for the language
     * implement a runtime for the language (interpreter)
