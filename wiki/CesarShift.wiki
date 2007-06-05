@@ -19,7 +19,7 @@ Also, the language does not need a lot of facilities:
   * write a line to stdout (write-line)
   * add two integers (add)
   * basic stack manipulation (swap, dup, rot, pick etc. see HP calculators...)
-  * working with lists (list-prepend, list-concat)
+  * working with lists (list-prepend, list-concat, list-is-empty)
 
 = Example =
 
@@ -27,8 +27,24 @@ Here is an example of how the cesar shift algorithm could be implemented in sina
 
 {{{
 
+{
+   /* 
+} :cesar-shift bind
 
+{
+   /* execute the cesar shift algorithm on stdin, DS: [] */
 
-main
+   read-line        /* DS: [ list ]
+   dup              /* DS: [ list list ]
+   list-is-empty    /* DS: [ list int ]
+   :break if        /* exit current block if true, DS: [ list ] */
+   cesar-shift      /* DS: [ list ]
+   write-line       /* DS: [ ]
+   loop             /* redo the current block (main) */
+
+} :main bind
+
+main                /* DS: [ empty-list ] */
+drop                /* [ ] */
 
 }}}
