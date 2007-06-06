@@ -20,7 +20,7 @@ Also, the language does not need a lot of facilities:
   * write a line to stdout (write-line)
   * simple arithmetic (add, sub, mod)
   * working with characters (char-is-alpha, char-to-upper)
-  * basic flow control (break, if, unless, loop, eval)
+  * basic flow control (break, if, unless, loop, call)
   * binding symbols (bind)
   * basic stack manipulation (swap, dup, rot)
   * working with lists (list-prepend, list-new, list-head, list-is-empty)
@@ -59,7 +59,7 @@ Here is an example of how the cesar shift algorithm could be implemented in sina
       swap                 /* DS: [ in-list out-list ] */
       loop
    }                       /* DS: [ in-list out-list(empty) block ] */
-   eval                    /* DS: [ out-list in-list(empty) ] */
+   call                    /* DS: [ out-list in-list(empty) ] */
    drop                    /* DS: [ out-list ] */
 } :cesar-shift bind
 
