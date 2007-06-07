@@ -51,8 +51,7 @@ Evaluation of a SYMBOL type is special: A symbol is evaluated by looking up the 
 = Example program =
 
 {{{
-"hello, what is your name?" print-string
-read-line :name bind-symbol
-"hello, " name cat-list print-string
+"hello, what is your name?" print-line
+read-line :name bind
+"hello, " name list-concat print-line
 }}}
-
