@@ -1,0 +1,13 @@
+#summary Documents the progress of this project.
+
+07.06.2007
+  After watching [http://video.google.com/videoplay?docid=2139967204534450862&q=hashtable this video on lock-free hashtables] I believe it might be possible to avoid locking in most cases for the GC. In Dijkstras GC algorithm, only the GC ever changes the current colour. The allocator (running in the interpreter thread) needs only to read the current colour and notice when it changes (compare it to a stored copy of the current value).
+  
+  The GC could therefore write the new colour and wait for the interpreter to pick up the change. I could use wait() and notify() here, since the GC doesn't really have to do anything until the interpreter wants to allocate more memory. But this would be designing for at most one worker thread, something I would prefer to avoid.
+  
+  What about allocation? Suppose we keep a linked list of all free memory chunks, preferably in ready-to-use sizes. Some mechanism would be needed to stop the GC and the allocator from interfering, since both of them are writing to the same list. If we rule that the GC only adds recycled chunks at the end of the list and the allocator only removes chunks from the front of the list, nobody is really in each others way: It wouldn't matter in which order the GC and the allocator arrive at the array, since the GC will traverse the list all the way to the end. If it finds it's not in the free list anymore, it just retries. Following the free list will have to include checking the next pointer for sanity (inside the heap? Don't want to risk a segmentation fault) and while traversing make sure the nodes are all free and of the correct node type. This will have to be thought through, just to be sure we don't run into a race condition here.
+  
+  An alternate idea would be to have two free lists: One maintained by the collector, the other maintained by the allocator. When the allocator runs out of space, it notifies the collector (write a flag, same problem as above with the current colour) and waits for the collector to feed it more memory.
+  
+  This all doesn't solve memory defragmentation. Sadly, that is an issue not addressed by Dijkstras GC algorithm. I'm not quite sure if I should come up with a solution or just leave it like it is...
+  
