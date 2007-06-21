@@ -14,7 +14,7 @@ This project is a school project I am writing as part of my studies at the [http
 
 To achieve these goals, I will need to:
 
-  * set up a project home (source control, status, 
+  * set up a project home (source control, status, documentation etc.)
   * define a language and it's runtime to work in conjunction with the GC.
   * [CesarShift define a problem to be solved by this language], with which I can test the two algorithms.
   * implement the (toy) language
