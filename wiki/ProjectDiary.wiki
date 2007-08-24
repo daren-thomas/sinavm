@@ -1,11 +1,11 @@
 #summary Documents the progress of this project.
 
 24.08.2007
-  Implemented a simple parser and a lexer for the SinaLanguage. So far, there aren't any actions defined, so the parser just works as an acceptor. Nevertheless, it was able to find a syntactic error in the wiki entry for the cesar-shift algorithm. That page has been updated. Also, the source for the parser (sina_parser.y), the lexer (sina_lexer.l), a shell script for building it (test.sh) and the cesar-shift file (cesar_shift.sina) were checked in.
+  Implemented a simple parser and a lexer for the SinaLanguage. So far, there aren't any actions defined, so the parser just works as an acceptor. Nevertheless, it was able to find a syntactic error in the wiki entry for the CesarShift algorithm. That page has been updated. Also, the source for the parser (sina_parser.y), the lexer (sina_lexer.l), a shell script for building it (test.sh) and the cesar-shift file (cesar_shift.sina) were checked in.
   By end of next week, I plan to implement the actions so that the parser assembles the bytecode for the sina vm. The single linked list I had planned so far as the datatype for sina code and sina lists poses a problem for the parser: Apparently, I am supposed to use left recursive rules as opposed to right recursive rules. Thus, appending a new list_element will either be O(n) for single linked list or O(1) for a more sophisticated data structure.
   I used these links as primers for flex and bison:
   * http://www.cs.utah.edu/dept/old/texinfo/bison/bison.html
-  * http://ds9a.nl/lex-yacc-howto.html
+  * http://ds9a.nl/lex-yacc/cvs/lex-yacc-howto.html
 
 26.06.2007
   Project speed has been rather slow so far. Today I finally nailed the [ProjectRequirement]s. This has been nagging me for a while, since it is not much of a chore (this is an exploration type project with a single main goal), but needs to be done before I can allow myself to continue with the design of the system. I expect the basic design to be finished by this time next week so I can start coding.
