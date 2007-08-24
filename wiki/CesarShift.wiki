@@ -55,7 +55,7 @@ Here is an example of how the cesar shift algorithm could be implemented in sina
       swap                 /* DS: [ out-list in-list ] */
       dup                  /* DS: [ out-list in-list in-list ] */
       list-is-empty        /* DS: [ out-list in-list int ] */
-      :break if            /* exit current block if != 0, DS: [ out-list in-list ]
+      :break if            /* exit current block if != 0, DS: [ out-list in-list ] */
       swap                 /* DS: [ in-list out-list ] */
       loop
    }                       /* DS: [ in-list out-list(empty) block ] */
