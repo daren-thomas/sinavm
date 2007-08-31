@@ -8,15 +8,16 @@ Sina is a typed language. Each piece of memory (object) has an associated type.
 
 = Types =
 
-  * INT -- an integer (Platforms notion of an int in C)
-  * NODE -- a node in a list
-  * EOL -- a special node denoting the end of a list (empty list)
-  * BLOCK -- the head of a block (references a list node)
+  * INTEGER -- an integer (Platforms notion of an int in C)
+  * LIST_NODE -- a node in a list
+  * LIST_HEAD -- maintains information about start and end of a list
+  * BLOCK -- the head of a block (references a list, knows current position in list)
   * NATIVE -- a pointer to native code (for built in functions)
   * SYMBOL -- a symbol in the program. Identifiers are translated into symbols. Symbols can be dynamically bound to other objects.
+  * ESCAPED_SYMBOL -- like a symbol, but with slightly modified semantics.
   
 
-"Strings" are represented as lists of INTs. There are built in functions to output a "string" and to read a string from input into a list.
+"Strings" are represented as lists of INTEGERSs. There are built in functions to output a "string" and to read a string from input into a list.
 
 
 = Syntax =
