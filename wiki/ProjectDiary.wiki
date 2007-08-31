@@ -1,5 +1,17 @@
 #summary Documents the progress of this project.
 
+31.08.2007
+  Fleshed out the parser to build the AST while parsing. This is done with the help of the {{{phelper.h}}} functions, but they will probably be refactored to the virtual maschine later on, since it is functionality needed there too ({{{sina_constructors.h}}}?).
+  Implemented a pretty printer for sina data to verify the parser - it seems to work quite well so far.
+  The symbol table is still a dummy, all symbols get mapped to id 42. This will change shortly, i intend to use the hashtable stuff in the standard library (not the GNU reentrant variant, since I don't expect to need more than one hash table for the moment).
+  Moved away from the {{{test.sh}}} script for compiling and did a proper {{{Makefile}}}.
+  Implemented a dummy allocator along with the relevant interface {{{sina_allocator.h}}}. This version just uses {{{malloc}}} for each allocation request - clearly, it will run out of memory soon, since there is no GC for this allocator. Garbage collectors and allocators will have to work hand in hand. I am thinking about adding an extra GC and will end up with these:
+  - TwoSpaceGarbageCollector
+  - DijkstraGarbageCollector 
+    1. with a mutex for the current "white" value
+    2. use {{{wait}}} and {{{notify}}} to coordinate allocator and gc, so allocator can keep a stash of pristine chunks.
+I will flesh out these Ideas by end of next week. Also, I want to have the interpreter going by then.
+
 24.08.2007
   Implemented a simple parser and a lexer for the SinaLanguage. So far, there aren't any actions defined, so the parser just works as an acceptor. Nevertheless, it was able to find a syntactic error in the wiki entry for the CesarShift algorithm. That page has been updated. Also, the source for the parser (sina_parser.y), the lexer (sina_lexer.l), a shell script for building it (test.sh) and the cesar-shift file (cesar_shift.sina) were checked in.
   By end of next week, I plan to implement the actions so that the parser assembles the bytecode for the sina vm. The single linked list I had planned so far as the datatype for sina code and sina lists poses a problem for the parser: Apparently, I am supposed to use left recursive rules as opposed to right recursive rules. Thus, appending a new list_element will either be O(n) for single linked list or O(1) for a more sophisticated data structure.
