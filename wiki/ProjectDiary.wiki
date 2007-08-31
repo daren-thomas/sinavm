@@ -6,10 +6,10 @@
   The symbol table is still a dummy, all symbols get mapped to id 42. This will change shortly, i intend to use the hashtable stuff in the standard library (not the GNU reentrant variant, since I don't expect to need more than one hash table for the moment).
   Moved away from the {{{test.sh}}} script for compiling and did a proper {{{Makefile}}}.
   Implemented a dummy allocator along with the relevant interface {{{sina_allocator.h}}}. This version just uses {{{malloc}}} for each allocation request - clearly, it will run out of memory soon, since there is no GC for this allocator. Garbage collectors and allocators will have to work hand in hand. I am thinking about adding an extra GC and will end up with these:
-  - TwoSpaceGarbageCollector
-  - DijkstraGarbageCollector 
-    1. with a mutex for the current "white" value
-    2. use {{{wait}}} and {{{notify}}} to coordinate allocator and gc, so allocator can keep a stash of pristine chunks.
+  * TwoSpaceGarbageCollector
+  * DijkstraGarbageCollector 
+    # with a mutex for the current "white" value
+    # use {{{wait}}} and {{{notify}}} to coordinate allocator and gc, so allocator can keep a stash of pristine chunks.
 I will flesh out these Ideas by end of next week. Also, I want to have the interpreter going by then.
 
 24.08.2007
