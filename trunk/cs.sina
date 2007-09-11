@@ -1,0 +1,28 @@
+{
+   dup                     
+   char-is-alpha           
+   :break unless           
+   char-to-upper           
+   'A' sub                
+   1 add                 
+   'Z' 'A' sub mod       
+} :cesar-shift-char bind
+
+{
+   list-new                
+   {
+      swap                 
+      list-head            
+      cesar-shift-char    
+      roll                 
+      list-prepend        
+      swap                 
+      dup                  
+      list-is-empty        
+      :break if            
+      swap                 
+      loop
+   }                      
+   call                    
+   drop                    
+} :cesar-shift bind
