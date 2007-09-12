@@ -1,5 +1,6 @@
 #include "sina_interpreter.h"
 #include "sina_types.h"
+#include "sinavm.h"
 
 /*
  * sina_interpreter.c
@@ -8,7 +9,7 @@
  * sina_interpreter.h for overview on how the interpreter
  * works.
  */
-void interpret_sina(sina_vm* vm, block_chunk* code)
+void sina_interpret(sinavm_data* vm, block_chunk* code)
 {
 
 }

@@ -13,7 +13,7 @@
 \)						return CLOSE_PAREN;
 \{						return OPEN_CURLY;
 \}						return CLOSE_CURLY;
-[a-zA-Z][-a-zA-Z0-9_]*	yylval.number=add_symbol(yytext); return SYMBOL;
+[a-zA-Z][-a-zA-Z0-9_]*	yylval.number=symbols_insert(yytext); return SYMBOL;
 :						return COLON;
 \n						/* ignore end of line */
 [ \t]+					/* ignore whitespace */

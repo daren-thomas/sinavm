@@ -7,6 +7,13 @@
 
 #include "sina_allocator.h"
 #include "sina_types.h"
+#include "sinavm.h"
+
+void sinavm_initialize(sinavm_data* vm)
+{
+    vm->cs = sinavm_new_list();
+    vm->ds = sinavm_new_list();
+}
 
 list_head_chunk* sinavm_new_list()
 {

@@ -7,12 +7,15 @@
  * the symboltable is used by the lexer.
  */
 
+/* max number of symbols */
+#define SINA_SYMBOLS_MAX 1024
+
 /*
  * adds a symbol to the symbol table and returns a numeric
  * identifier for that symbol. If the symbol was allready
  * in the symbol table, return the same numeric identifier
  * as last time.
  */
-int add_symbol(char* symbol);
+int symbols_insert(char* symbol);
 
 #endif

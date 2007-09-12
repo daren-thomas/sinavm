@@ -2,6 +2,8 @@
 #define SINE_INTERPRETER_H
 
 #include "sina_types.h"
+#include "sinavm.h"
+
 /*
  * sina_interpreter.h
  *
@@ -32,10 +34,9 @@
  *     current node to first node in list.
  *   - else: interpret chunk.
  */
-
-/* initialize and start interpreting according to algorithm 
- * described above 
+ 
+/* start interpreting according to algorithm described above 
  */
-void interpret_sina(sina_vm* vm, block_chunk* code);
+void sina_interpret(sinavm_data* vm, block_chunk* code);
 
 #endif

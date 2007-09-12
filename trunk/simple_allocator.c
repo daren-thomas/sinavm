@@ -7,8 +7,8 @@
  * garbage collectors.
  */
 
-#include "sina_types.h";
-#include <stdlib.h>;
+#include "sina_types.h"
+#include <stdlib.h>
 
 void allocate_heap(size_t size)
 {
