@@ -1,4 +1,5 @@
-OBJECTS = sina_symbols.o phelper.o simple_allocator.o lex.yy.o pprinter.o sina_parser.tab.o main.o
+OBJECTS = sina_symbols.o sinavm.o simple_allocator.o lex.yy.o pprinter.o \
+          sina_parser.tab.o main.o sina_interpreter.o
 
 default: test
 
@@ -18,4 +19,5 @@ test: build
 	cat test.sina | ./sina test.sina
 
 clean:
-	rm *.o *.tab.c lex.yy.c sina
+	rm *.o *.tab.c lex.yy.c
+	rm sina

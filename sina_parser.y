@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
-#include "phelper.h"
+#include "sinavm.h"
 #include "pprinter.h"
 
 #define YYDEBUG 1
@@ -42,26 +42,26 @@ block_chunk* code;
 program: 
 	list_elements 
 		{ 
-			$$ = phelper_new_block($1);
+			$$ = sinavm_new_block($1);
 			code = $$;
 		} 
 	;
 
 list_elements:
-	/* empty */ { $$ = phelper_new_list(); }
+	/* empty */ { $$ = sinavm_new_list(); }
 	| list_elements list_element
 		{
-			$$ = phelper_push_back($1, $2);
+			$$ = sinavm_push_back($1, $2);
 		}
 	;
 
 list_element:
-	INTEGER 			{ $$ = phelper_new_int($1); }
+	INTEGER 			{ $$ = sinavm_new_int($1); }
 	| list				{ $$ = $1; }
 	| block				{ $$ = $1; }
 	| escaped_symbol	{ $$ = $1; }
-	| SYMBOL			{ $$ = phelper_new_symbol($1); }
-	| STRING			{ $$ = phelper_new_string($1); }
+	| SYMBOL			{ $$ = sinavm_new_symbol($1); }
+	| STRING			{ $$ = sinavm_new_string($1); }
 	;
 
 list: OPEN_PAREN list_elements CLOSE_PAREN 
@@ -71,12 +71,12 @@ list: OPEN_PAREN list_elements CLOSE_PAREN
 	;
 block: OPEN_CURLY list_elements CLOSE_CURLY 
 	{
-		$$ = phelper_new_block($2);
+		$$ = sinavm_new_block($2);
 	}
 	;
 escaped_symbol: COLON SYMBOL 
 	{
-		$$ = phelper_new_escaped_symbol($2);
+		$$ = sinavm_new_escaped_symbol($2);
 	}
 	;
 

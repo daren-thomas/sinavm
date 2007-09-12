@@ -12,6 +12,18 @@
 
 #include "sina_types.h"
 
+ /* datastructure used by the interpreter for the vm
+  */
+typedef struct {
+    list_head_chunk* cs;
+    list_head_chunk* ds;
+} sinavm_data;
+
+/* initializes a sina_vm structure 
+ */
+void sinavm_initialize(sinavm_data* vm);
+
+
 /*
  * create a new list and return a pointer to it.
  */
