@@ -19,5 +19,5 @@ test: build
 	cat test.sina | ./sina test.sina
 
 clean:
-	rm *.o *.tab.c lex.yy.c
+	rm *.o *.tab.c *.tab.h lex.yy.c
 	rm sina
