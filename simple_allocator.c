@@ -18,7 +18,7 @@ void allocate_heap(size_t size)
 void* allocate_chunk(int type)
 {
 	void* result;
-	switch(type)
+	switch (type)
 	{
 		case INTEGER_CHUNK:
 			result = malloc(sizeof(integer_chunk));

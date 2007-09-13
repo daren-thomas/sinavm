@@ -1,5 +1,5 @@
 OBJECTS = sina_symbols.o sinavm.o simple_allocator.o lex.yy.o pprinter.o \
-          sina_parser.tab.o main.o sina_interpreter.o
+          sina_parser.tab.o main.o sina_interpreter.o sina_error.o
 
 default: test
 

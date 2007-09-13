@@ -8,11 +8,21 @@
 #include "sina_allocator.h"
 #include "sina_types.h"
 #include "sinavm.h"
+#include <string.h>
+#include "sina_builtins.h"
 
 void sinavm_initialize(sinavm_data* vm)
 {
     vm->cs = sinavm_new_list();
     vm->ds = sinavm_new_list();
+    
+    int i;
+    for (i = 0; i < SINAVM_MAX_SYMBOLS; ++i)
+    {
+        vm->bindings[i] = NULL;
+    }
+    
+    builtins_add(vm);
 }
 
 list_head_chunk* sinavm_new_list()
@@ -45,6 +55,40 @@ list_head_chunk* sinavm_push_back(list_head_chunk* list, void* data)
 		list->last = node;
 	}
 	return list;
+}
+
+list_head_chunk* sinavm_push_front(list_head_chunk* list, void* data)
+{
+    list_node_chunk* node = (list_node_chunk*)
+        allocate_chunk(LIST_NODE_CHUNK);
+    
+    node->data = data;
+    node->next = list->first;
+    list->first = node;
+    
+    if (list->last == NULL)
+    {
+        /* list was empty on call */
+        list->last = node;
+    }
+    return list;
+}
+
+list_head_chunk* sinavm_pop_front(list_head_chunk* list)
+{
+    if (list->first != NULL)
+    {
+        if (list->first == list->last)
+        {
+            /* only one element left in list */
+            list->first = NULL;
+            list->last  = NULL;
+        }
+        else
+        {
+            list->first = list->first->next;
+        }
+    }
 }
 
 integer_chunk* sinavm_new_int(int value)
@@ -94,4 +138,23 @@ list_head_chunk* sinavm_new_string(char* string)
 		result = sinavm_push_back(result, i);
 	}
 	return result;
+}
+
+int sinavm_list_empty(list_head_chunk* list)
+{
+    if (list->first == NULL && list->last == NULL)
+    {
+        /* list is empty */
+        return 1;
+    }
+    else
+    {
+        /* list has at least 1 element */
+        return 0;
+    }
+}
+
+chunk_header* sinavm_dereference_symbol(sinavm_data* vm, int symbol)
+{
+    return vm->bindings[symbol];
 }
