@@ -60,7 +60,7 @@ typedef struct {
 	list_node_chunk* current;
 } block_chunk;
 
-typedef native_func void (*
+typedef void (*native_func)(sinavm_data*);
 typedef struct {
     chunk_header header;
     native_func  func;
