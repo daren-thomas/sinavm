@@ -13,13 +13,15 @@
 
 #define INTEGER_CHUNK 			1
 #define SYMBOL_CHUNK 			2
-#define ESCAPED_SYMBOL_CHUNK 	3
+#define ESCAPED_SYMBOL_CHUNK    3
 #define LIST_NODE_CHUNK 		4
 #define LIST_HEAD_CHUNK			5
 #define BLOCK_CHUNK				6
+#define NATIVE_CHUNK            7
 
 typedef char chunk_type;
 typedef char chunk_colour; /* free vs. black, grey, white */
+
 typedef struct {
 	chunk_type type;
 	chunk_colour colour;
@@ -57,5 +59,11 @@ typedef struct {
 	list_head_chunk* code;
 	list_node_chunk* current;
 } block_chunk;
+
+typedef native_func void (*
+typedef struct {
+    chunk_header header;
+    native_func  func;
+}
 
 #endif
