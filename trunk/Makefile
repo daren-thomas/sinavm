@@ -1,5 +1,6 @@
 OBJECTS = sina_symbols.o sinavm.o simple_allocator.o lex.yy.o pprinter.o \
-          sina_parser.tab.o main.o sina_interpreter.o sina_error.o
+          sina_parser.tab.o main.o sina_interpreter.o sina_error.o \
+		  sina_builtins.o
 
 default: test
 
@@ -19,5 +20,5 @@ test: build
 	cat test.sina | ./sina test.sina
 
 clean:
-	rm *.o *.tab.c *.tab.h lex.yy.c
+	rm *.o *.tab.c *.tab.h lex.yy.c *.gch
 	rm sina
