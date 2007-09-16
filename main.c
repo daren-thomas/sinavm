@@ -27,6 +27,12 @@ int main(int argc, char** argv)
     /* allocator needs to be initialized before any calls to it are made */
     allocate_heap(1024); /* for now, we hardwire the size of the heap */
 
+	sinavm_data vm;
+	printf("before sinavm_initialize\n");
+    sinavm_initialize(&vm);
+	printf("after sinavm_initialize\n");
+	pprint_vm_state(&vm);
+
 	/* start parsing, result will be a block in the variable
 	 * code
 	 */
@@ -39,9 +45,10 @@ int main(int argc, char** argv)
         
         printf("\nrunning interpreter...\n\n");
         
-        sinavm_data vm;
-        sinavm_initialize(&vm);
+        
         sina_interpret(&vm, code);
+		printf("\nfinnished interpreting\n");
+		pprint_vm_state(&vm);
 		return 0;
 	}
 	else
