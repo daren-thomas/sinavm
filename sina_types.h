@@ -60,10 +60,23 @@ typedef struct {
 	list_node_chunk* current;
 } block_chunk;
 
+/* maximum amount of symbols that can be bound */
+#define SINAVM_MAX_SYMBOLS 1024 
+
+ /* datastructure used by the interpreter for the vm
+  */
+typedef struct {
+    list_head_chunk* cs;
+    list_head_chunk* ds;
+    chunk_header** bindings;  
+} sinavm_data;
+
 typedef void (*native_func)(sinavm_data*);
+
 typedef struct {
     chunk_header header;
     native_func  func;
-}
+} native_chunk;
+
 
 #endif

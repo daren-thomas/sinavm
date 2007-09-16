@@ -23,6 +23,8 @@ void sina_interpret(sinavm_data* vm, block_chunk* code)
     printf("sinavm_list_empty(vm->cs)? %d\n", sinavm_list_empty(vm->cs));
     while ( ! sinavm_list_empty(vm->cs))
     {
+		printf("interpreting...\n");
+		pprint_vm_state(vm);
         block_chunk* current_block = (block_chunk*) vm->cs->first->data;
         if (NULL == current_block->current)
         {
@@ -43,6 +45,7 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 {
     escaped_symbol_chunk*  esym     = NULL;
     symbol_chunk*          symbol   = NULL;
+	native_chunk*		   native	= NULL;
     
     switch (header->type)
     {
@@ -67,6 +70,11 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 		case SYMBOL_CHUNK:
 			symbol = (symbol_chunk*) header;
             interpret_symbol(vm, symbol->symbol);
+			break;
+
+		case NATIVE_CHUNK:
+			native = (native_chunk*) header;
+			native->func(vm);
 			break;
         
         default:

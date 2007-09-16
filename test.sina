@@ -1,1 +1,1 @@
-1 2 add ( 4 ) add swap add append
+1 2 add ( 4 ) swap 3 add append

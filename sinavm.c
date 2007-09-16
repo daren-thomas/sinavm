@@ -10,18 +10,25 @@
 #include "sinavm.h"
 #include <string.h>
 #include "sina_builtins.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 void sinavm_initialize(sinavm_data* vm)
 {
-    vm->cs = sinavm_new_list();
+	printf("in sinavm_initialize\n");
+	vm->cs = sinavm_new_list();
+	printf("initialized cs\n");
     vm->ds = sinavm_new_list();
+	printf("initialized ds\n");
+	vm->bindings = malloc(sizeof(chunk_header*) * SINAVM_MAX_SYMBOLS);
+	printf("initialized bindings\n");
     
-    int i;
+	int i;
     for (i = 0; i < SINAVM_MAX_SYMBOLS; ++i)
     {
-        vm->bindings[i] = NULL;
+        (vm->bindings)[i] = NULL;
     }
-    
+   	printf("before builtins_add\n"); 
     builtins_add(vm);
 }
 
@@ -128,6 +135,15 @@ block_chunk* sinavm_new_block(list_head_chunk* list)
 	return result;
 }
 
+native_chunk* sinavm_new_native(native_func f)
+{
+	native_chunk* result = (native_chunk*)
+		allocate_chunk(NATIVE_CHUNK);
+
+	result->func = f;
+	return result;
+}
+
 list_head_chunk* sinavm_new_string(char* string)
 {
 	list_head_chunk* result = sinavm_new_list();
@@ -156,5 +172,17 @@ int sinavm_list_empty(list_head_chunk* list)
 
 chunk_header* sinavm_dereference_symbol(sinavm_data* vm, int symbol)
 {
-    return vm->bindings[symbol];
+    return (vm->bindings)[symbol];
+}
+
+void sinavm_bind(sinavm_data* vm, int symbol, chunk_header* data)
+{
+	if (symbol >= SINAVM_MAX_SYMBOLS)
+	{
+		error_exit("symbol range exceeded.");
+	}
+	else
+	{
+		(vm->bindings)[symbol] = data;
+	}
 }
