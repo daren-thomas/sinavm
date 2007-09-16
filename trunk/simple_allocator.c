@@ -9,6 +9,7 @@
 
 #include "sina_types.h"
 #include <stdlib.h>
+#include "sina_error.h"
 
 void allocate_heap(size_t size)
 {
@@ -17,7 +18,7 @@ void allocate_heap(size_t size)
 
 void* allocate_chunk(int type)
 {
-	void* result;
+	void* result = NULL;
 	switch (type)
 	{
 		case INTEGER_CHUNK:
@@ -43,11 +44,15 @@ void* allocate_chunk(int type)
 		case BLOCK_CHUNK:
 			result = malloc(sizeof(block_chunk));
 			break;
+
+		case NATIVE_CHUNK:
+			result = malloc(sizeof(native_chunk));
+			break;
 	}
 
 	if (NULL == result)
 	{
-		/* FIXME: die a horrible death */
+		error_exit("unknown chunk type\n");
 	}
 	else
 	{

@@ -8,6 +8,7 @@
 #include "sina_symbols.h"
 #include <search.h>
 #include <string.h>
+#include <stdlib.h>
 
 typedef struct {
     char*   name;

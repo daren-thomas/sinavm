@@ -5,6 +5,7 @@
  *
  */
 #include "pprinter.h"
+#include "sina_types.h"
 #include <stdio.h>
 
 void pprint_integer(integer_chunk*);
@@ -12,6 +13,15 @@ void pprint_symbol(symbol_chunk*);
 void pprint_escaped_symbol(escaped_symbol_chunk*);
 void pprint_list_head(list_head_chunk*);
 void pprint_block(block_chunk*);
+
+void pprint_vm_state(sinavm_data* vm)
+{
+	printf("ds: ");
+	pprint(vm->ds); printf("\n");
+	printf("cs: ");
+	pprint(vm->cs); printf("\n");
+
+}
 
 void pprint(chunk_header* chunk)
 {
