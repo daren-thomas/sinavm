@@ -17,13 +17,11 @@ void execute_block(sinavm_data* vm, block_chunk* block);
  */
 void sina_interpret(sinavm_data* vm, block_chunk* code)
 {
-    printf("sina_interpret\n");
     sinavm_push_front(vm->cs, code);
     
-    printf("sinavm_list_empty(vm->cs)? %d\n", sinavm_list_empty(vm->cs));
     while ( ! sinavm_list_empty(vm->cs))
     {
-		printf("interpreting...\n");
+		printf("--------------------------------------------------------------------------------------\n");
 		pprint_vm_state(vm);
         block_chunk* current_block = (block_chunk*) vm->cs->first->data;
         if (NULL == current_block->current)
@@ -50,7 +48,6 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
     switch (header->type)
     {
         case INTEGER_CHUNK:
-            printf("interpret_chunk: INTEGER_CHUNK\n");
         case LIST_HEAD_CHUNK:
             /* push chunk onto DS */
 			sinavm_push_front(vm->ds, header);
@@ -91,9 +88,7 @@ void execute_block(sinavm_data* vm, block_chunk* block)
 /* symbols need to be interpreted specially (see sina_interpreter.h) */
 void interpret_symbol(sinavm_data* vm, int symbol)
 {
-    printf("interpret_symbol: %d\n", symbol);
     chunk_header* header = sinavm_dereference_symbol(vm, symbol);
-    printf("sinavm_dereference_symbol: %d\n", header);
     if (NULL == header)
     {
         error_exit("cannot interpret unbound symbol");
