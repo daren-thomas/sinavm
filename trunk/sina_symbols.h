@@ -18,4 +18,9 @@
  */
 int symbols_insert(char* symbol);
 
+/*
+ * returns the name of a symbol with a specific id
+ */
+char* symbols_find(int id);
+
 #endif

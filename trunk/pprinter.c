@@ -61,12 +61,12 @@ void pprint_integer(integer_chunk* chunk)
 
 void pprint_symbol(symbol_chunk* chunk)
 {
-	printf(" symbol<%d> ", chunk->symbol);
+	printf(" symbol<%s> ", symbols_find(chunk->symbol));
 }
 
 void pprint_escaped_symbol(escaped_symbol_chunk* chunk)
 {
-	printf(" :symbol<%d> ", chunk->symbol);
+	printf(" :symbol<%s> ", symbols_find(chunk->symbol));
 }
 
 void pprint_list_head(list_head_chunk* chunk)
@@ -83,9 +83,8 @@ void pprint_list_head(list_head_chunk* chunk)
 void pprint_block(block_chunk* chunk)
 {
 	printf(" { ");
-	list_head_chunk* list = chunk->code;
 	list_node_chunk* node;
-	for (node = list->first; node != NULL; node = node->next)
+	for (node = chunk->current; node != NULL; node = node->next)
 	{
 		pprint((chunk_header*) node->data);
 	}
