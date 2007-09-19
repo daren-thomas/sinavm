@@ -41,12 +41,12 @@ Parsing Sina source code results in a list of typed "objects". The [SinaVM] then
 Evaluation of a SYMBOL type is special: A symbol is evaluated by looking up the object it refers to and evaluating that instead. Evaluating a symbol that is not bound to an object is an error. This mode of evaluating a symbol can be suppressed by "escaping" the symbol (prefixing the symbol with a colon). This pushes the symbol itself onto the DS.
 
 || *type* || *execution behavior*  ||
-|| INT  || push DS ||
-|| NODE || push DS ||
-|| EOL  || push DS ||
+|| INTEGER  || push DS ||
+|| LIST_HEAD || push DS ||
+|| ESCAPED_SYMBOL  || push DS ||
 || BLOCK || push DS ||
 || NATIVE || execute function ||
-|| SYMBOL || look up symbol, execute according to bound type. Error if not bound. ||
+|| SYMBOL || look up symbol, if it is a BLOCK, then push it onto CS, next object to be executed is first element in BLOCK. Else interpret according to type. ||
 
 
 = Example program =
@@ -56,3 +56,4 @@ Evaluation of a SYMBOL type is special: A symbol is evaluated by looking up the 
 read-line :name bind
 "hello, " name list-concat print-line
 }}}
+ 
