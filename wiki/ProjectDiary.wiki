@@ -1,5 +1,10 @@
 #summary Documents the progress of this project.
 
+19.09.2007
+  The interpreter now runs a small test file - will have to implement builtins for the whole of the CesarShift algorithm, but I don't expect many problems there. 
+
+  Goal for this week: Implement a GarbageCollector (The TwoSpaceAlgorithm for starters - we don't want to get our hands messy with pthreads just yet.
+
 31.08.2007
   Fleshed out the parser to build the AST while parsing. This is done with the help of the {{{phelper.h}}} functions, but they will probably be refactored to the virtual maschine later on, since it is functionality needed there too ({{{sina_constructors.h}}}?).
 
@@ -39,3 +44,4 @@
   This all doesn't solve memory defragmentation. Sadly, that is an issue not addressed by Dijkstras GC algorithm. I'm not quite sure if I should come up with a solution or just leave it like it is. With the SinaLanguage design, chunks only ever come in fixed sizes, so compacting might not be an issue at all anyway.
 
   
+ 
