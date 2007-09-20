@@ -34,7 +34,19 @@ void sina_interpret(sinavm_data* vm, block_chunk* code)
             list_node_chunk* current = current_block->current;                       
             interpret_chunk(vm, (chunk_header*)current->data);
             
-            current_block->current = current_block->current->next;
+            if (sinavm_flowcontrol_get(vm))
+            {
+                /* something we executed did it's own flow control -
+                   the vm is set to execute the correct block on next
+                   iteration.
+                */
+                sinavm_flowcontrol_unset(vm);
+            }
+            else
+            {                
+                /* only do this, if we did not execute any flow control */
+                current_block->current = current_block->current->next;
+            }
         }
     }
 }
@@ -66,7 +78,7 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 
 		case SYMBOL_CHUNK:
 			symbol = (symbol_chunk*) header;
-            interpret_symbol(vm, symbol->symbol);
+            sina_interpret_symbol(vm, symbol->symbol);
 			break;
 
 		case NATIVE_CHUNK:
@@ -80,7 +92,7 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 }
 
 /* symbols need to be interpreted specially (see sina_interpreter.h) */
-void interpret_symbol(sinavm_data* vm, int symbol)
+void sina_interpret_symbol(sinavm_data* vm, int symbol)
 {
     chunk_header* header = sinavm_dereference_symbol(vm, symbol);
     if (NULL == header)

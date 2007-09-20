@@ -57,7 +57,7 @@ typedef struct {
 typedef struct {
 	chunk_header header;
 	list_head_chunk* code;
-	list_node_chunk* current;
+	list_node_chunk* current;    
 } block_chunk;
 
 /* maximum amount of symbols that can be bound */
@@ -68,7 +68,8 @@ typedef struct {
 typedef struct {
     list_head_chunk* cs;
     list_head_chunk* ds;
-    chunk_header** bindings;  
+    chunk_header** bindings;
+    unsigned int flags;    
 } sinavm_data;
 
 typedef void (*native_func)(sinavm_data*);

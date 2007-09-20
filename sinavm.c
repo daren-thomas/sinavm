@@ -211,3 +211,27 @@ void sinavm_execute_block(sinavm_data* vm, block_chunk* block)
     block_chunk* newblock = sinavm_new_block(block->code);
     sinavm_push_front(vm->cs, newblock);
 }
+
+/* return 1, if the flowcontrol flag is set. This bit means, that a flow control
+ * command was executed and that the vm is set to the next statement (don't
+ * advance the blocks current pointer)
+ */
+#define SINAVM_FLAGS_FLOWCONTROL 1
+int sinavm_flowcontrol_get(sinavm_data* vm)
+{
+    return vm->flags & SINAVM_FLAGS_FLOWCONTROL;
+}
+
+/* sets the flowcontrol flag. Used by builtins such as 'loop' and 'break' */
+void sinavm_flowcontrol_set(sinavm_data* vm)
+{
+    vm->flags = vm->flags | SINAVM_FLAGS_FLOWCONTROL;
+}
+
+/* unsets the flowcontrol flag. Called by the interpreter on reading a set flowcontrol
+ * flag.
+ */
+void sinavm_flowcontrol_unset(sinavm_data* vm)
+{
+    vm->flags = vm->flags & ~SINAVM_FLAGS_FLOWCONTROL;
+}

@@ -16,8 +16,8 @@
 [a-zA-Z][-a-zA-Z0-9_]*	yylval.number=symbols_insert(yytext); return SYMBOL;
 :						return COLON;
 \n						/* ignore end of line */
-[ \t]+					/* ignore whitespace */
+[ \t\r]+					/* ignore whitespace */
 \/\*.*\*\/				/* ignore comments */
-".*"					yylval.string=yytext; return STRING;
+\".*\"					yylval.string=yytext; return STRING;
 .						return (int) yytext[0];
 %%

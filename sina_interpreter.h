@@ -39,4 +39,9 @@
  */
 void sina_interpret(sinavm_data* vm, block_chunk* code);
 
+/* interpret a symbol (dereference it and interpret the result, blocks
+ * are executed (pushed onto cs) as opposed to pushed onto ds
+ */
+void sina_interpret_symbol(sinavm_data* vm, int symbol);
+
 #endif
