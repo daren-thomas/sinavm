@@ -1,1 +1,1 @@
-1 2 add ( 4 ) swap 3 add append
+{1 add} :inc bind 1 inc inc ( 4 ) swap 3 add append { 4 append } call

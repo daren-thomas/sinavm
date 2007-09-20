@@ -81,10 +81,12 @@ list_head_chunk* sinavm_push_front(list_head_chunk* list, void* data)
     return list;
 }
 
-list_head_chunk* sinavm_pop_front(list_head_chunk* list)
+chunk_header* sinavm_pop_front(list_head_chunk* list)
 {
-    if (list->first != NULL)
+	chunk_header* result = NULL;
+    if (NULL != list->first)
     {
+		result = list->first->data;
         if (list->first == list->last)
         {
             /* only one element left in list */
@@ -95,7 +97,24 @@ list_head_chunk* sinavm_pop_front(list_head_chunk* list)
         {
             list->first = list->first->next;
         }
+        return result;
     }
+	else
+	{
+		return NULL;
+	}
+}
+
+int sinavm_type_front(list_head_chunk* list)
+{
+	if (NULL != list->first)
+	{
+		return list->first->data->type;	
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 integer_chunk* sinavm_new_int(int value)
@@ -185,4 +204,10 @@ void sinavm_bind(sinavm_data* vm, int symbol, chunk_header* data)
 	{
 		(vm->bindings)[symbol] = data;
 	}
+}
+
+void sinavm_execute_block(sinavm_data* vm, block_chunk* block)
+{
+    block_chunk* newblock = sinavm_new_block(block->code);
+    sinavm_push_front(vm->cs, newblock);
 }

@@ -54,8 +54,8 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 			break;       
         
         case BLOCK_CHUNK:
-            /* push a copy of block onto cs and set current to first node */
-			execute_block(vm, (block_chunk*) header);
+            /* push block onto ds, to execute a block_chunk: use 'call' or bind symbol */
+			sinavm_push_front(vm->ds, header);
 			break;
         
         case ESCAPED_SYMBOL_CHUNK:
@@ -79,12 +79,6 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
     }
 }
 
-void execute_block(sinavm_data* vm, block_chunk* block)
-{
-    block_chunk* newblock = sinavm_new_block(block->code);
-    sinavm_push_front(vm->cs, newblock);
-}
-
 /* symbols need to be interpreted specially (see sina_interpreter.h) */
 void interpret_symbol(sinavm_data* vm, int symbol)
 {
@@ -97,8 +91,7 @@ void interpret_symbol(sinavm_data* vm, int symbol)
     {
         if (BLOCK_CHUNK == header->type)
         {
-            /* execute block */
-            execute_block(vm, (block_chunk*) header);
+            sinavm_execute_block(vm, (block_chunk*) header);
         }
         else
         {

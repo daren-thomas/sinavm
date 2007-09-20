@@ -12,3 +12,11 @@ void error_exit(char* reason)
     puts(reason);
     exit(EXIT_FAILURE);
 }
+
+void error_assert(int condition, char* errormsg)
+{
+	if (0 == condition)
+	{
+		error_exit(errormsg);
+	}
+}

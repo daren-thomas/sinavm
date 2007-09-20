@@ -7,6 +7,11 @@
  * describes the interface for abnormal program termination
  */
  
- void error_exit(char* reason);
+void error_exit(char* reason);
+
+/*
+ * if condition = 0, exit with errormsg.
+ */
+void error_assert(int condition, char* errormsg);
  
- #endif
+#endif
