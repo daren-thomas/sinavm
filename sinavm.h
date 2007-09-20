@@ -34,10 +34,15 @@ list_head_chunk* sinavm_push_back(list_head_chunk* list, void* data);
 list_head_chunk* sinavm_push_front(list_head_chunk* list, void* data);
 
 /*
- * pop the first item off the list. If the list is empty,
- * do nothing.
+ * pop the first item off the list and return pointer to nodes data. 
+ * If the list is empty, return NULL.
  */
-list_head_chunk* sinavm_pop_front(list_head_chunk* list);
+chunk_header* sinavm_pop_front(list_head_chunk* list);
+
+/* return the type of the first item in the list. If the list is
+ * empty, return -1 (invalid type value)
+ */
+int sinavm_type_front(list_head_chunk* list);
 
 /*
  * allocate space for an integer and return a pointer to it
@@ -90,5 +95,10 @@ chunk_header* sinavm_dereference_symbol(sinavm_data* vm, int symbol);
  * binds a symbol to a chunk so that it can be dereferenced later.
  */
 void sinavm_bind(sinavm_data* vm, int symbol, chunk_header* data);
+
+/* execute the block by pushing a copy of it (reinitializes the current-pointer)
+ * and pushing it onto the CS
+ */
+void sinavm_execute_block(sinavm_data* vm, block_chunk* block);
 
 #endif

@@ -16,57 +16,61 @@ void add_func(sinavm_data* vm, char* symbol, native_func f);
 void add(sinavm_data* vm);
 void append(sinavm_data* vm);
 void swap(sinavm_data* vm);
+void bind(sinavm_data* vm);
+void call(sinavm_data* vm);
 
 void builtins_add(sinavm_data* vm) {
-	printf("in builtins_add\n");
 	add_func(vm, "add", add);
-	printf("added func 'add'\n");
 	add_func(vm, "swap", swap);
-	printf("added func 'swap'\n");
 	add_func(vm, "append", append);
-	printf("added func 'append'\n");
+	add_func(vm, "bind", bind);
+    add_func(vm, "call", call);
 }
 
 void add_func(sinavm_data* vm, char* name, native_func f)
 {
 	int symbol = symbols_insert(name);
-	printf("inserted symbol\n");
 	native_chunk* n = sinavm_new_native(f);
-	printf("created new native\n");
 	sinavm_bind(vm, symbol, (chunk_header*) n);	
+}
+
+void call(sinavm_data* vm)
+{
+    error_assert(!sinavm_list_empty(vm->ds), "call: too few arguments\n");
+    error_assert(BLOCK_CHUNK == sinavm_type_front(vm->ds),
+        "call: expected block\n");
+    block_chunk* bc = (block_chunk*) sinavm_pop_front(vm->ds);
+    sinavm_execute_block(vm, bc);    
+}
+
+/* bind a symbol on the DS to the next chunk on the DS */
+void bind(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds), "bind: too few arguments\n");	
+	error_assert(SYMBOL_CHUNK == sinavm_type_front(vm->ds), 
+		"bind: expected symbol\n");
+	symbol_chunk* sc = (symbol_chunk*) sinavm_pop_front(vm->ds);	
+	int symbol = sc->symbol;
+
+	error_assert(!sinavm_list_empty(vm->ds), "bind: too few arguments\n");
+	sinavm_bind(vm, symbol, sinavm_pop_front(vm->ds));
 }
 
 /* add the two top numbers in the data stack */
 void add(sinavm_data* vm)
 {
-	if (sinavm_list_empty(vm->ds))
-	{
-		error_exit("add: too few arguments\n");
-	}
-	chunk_header* ac = vm->ds->first->data;
-	sinavm_pop_front(vm->ds);
-	if (INTEGER_CHUNK != ac->type)
-	{
-		error_exit("add: expected integer\n");
-	}
-	integer_chunk* ai = (integer_chunk*) ac;
-	int a = ai->value;
+	error_assert(!sinavm_list_empty(vm->ds), "add: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"add: expected integer\n");
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
 	
-	if (sinavm_list_empty(vm->ds))
-	{
-		error_exit("add: too few arguments\n");
-	}
-	chunk_header* bc = vm->ds->first->data;
-	sinavm_pop_front(vm->ds);
-	if (INTEGER_CHUNK != bc->type)
-	{
-		error_exit("add: expected integer\n");
-	}
-	integer_chunk* bi = (integer_chunk*) bc;
-	int b = bi->value;
-	
-	integer_chunk* ci = sinavm_new_int(a + b);
-	sinavm_push_front(vm->ds, ci);
+	error_assert(!sinavm_list_empty(vm->ds), "add: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"add: expected integer\n");
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+
+	integer_chunk* c = sinavm_new_int(a->value + b->value);
+	sinavm_push_front(vm->ds, c);
 }
 
 /* append the chunk on top of the stack to the list
@@ -74,33 +78,15 @@ void add(sinavm_data* vm)
  */
 void append(sinavm_data* vm)
 {
-	if (sinavm_list_empty(vm->ds))
-	{
-		error_exit("append: expected [list data], found empty stack\n");
-	}
-	else
-	{
-		chunk_header* data = vm->ds->first->data;
-		sinavm_pop_front(vm->ds);
-
-		if (sinavm_list_empty(vm->ds))
-		{
-			error_exit("append: too few arguments\n");
-		}
-		else
-		{
-			chunk_header* header = vm->ds->first->data;
-			if (LIST_HEAD_CHUNK != header->type)
-			{
-				error_exit("append: second argument must be list\n");
-			}
-			else
-			{
-				list_head_chunk* list = (list_head_chunk*) header;
-				sinavm_push_back(list, data);
-			}
-		}
-	}
+    error_assert(!sinavm_list_empty(vm->ds), "append: not enough arguments\n");
+    chunk_header* data = sinavm_pop_front(vm->ds);
+    
+    error_assert(!sinavm_list_empty(vm->ds), "append: not enough arguments\n");
+    error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
+        "append: second argument must be list\n");
+    
+    list_head_chunk* list = (list_head_chunk*) vm->ds->first->data;
+    sinavm_push_back(list, data);
 }
 
 /* swap the too top items in the ds */
