@@ -23,6 +23,10 @@ void call(sinavm_data* vm);
 void loop(sinavm_data* vm);
 void _if(sinavm_data* vm);
 void equals(sinavm_data* vm);
+void _break(sinavm_data* vm);
+void dup(sinavm_data* vm);
+void drop(sinavm_data* vm);
+void print_line(sinavm_data* vm);
 
 void builtins_add(sinavm_data* vm) {
 	add_func(vm, "add", add);
@@ -33,6 +37,10 @@ void builtins_add(sinavm_data* vm) {
     add_func(vm, "loop", loop);
     add_func(vm, "if", _if);
     add_func(vm, "equals", equals);
+	add_func(vm, "break", _break);
+	add_func(vm, "dup", dup);
+	add_func(vm, "drop", drop);
+	add_func(vm, "print-line", print_line);
 }
 
 void add_func(sinavm_data* vm, char* name, native_func f)
@@ -42,10 +50,86 @@ void add_func(sinavm_data* vm, char* name, native_func f)
 	sinavm_bind(vm, symbol, (chunk_header*) n);	
 }
 
+/* print a list of integers as a series of characters,
+ * append a newline */
+void print_line(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"print-line: too few arguments\n");
+	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
+		"print-line: expected list\n");
+
+	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+	list_node_chunk* node = list->first;
+	while (NULL != node)
+	{
+		error_assert(INTEGER_CHUNK == node->data->type,
+			"print-line: expected list of integers\n");
+
+		integer_chunk* c = (integer_chunk*) node->data;
+		putchar(c->value);
+
+		node = node->next;
+	}
+	putchar('\n');
+}
+
+/* drop topmost chunk from data stack */
+void drop(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"drop: too few arguments\n");
+
+	sinavm_pop_front(vm->ds);
+}
+
+/* duplicate top item on stack. since we have a policy of
+ * not changing data, dup can simply push the *same* item
+ * onto front of list, as opposed to creating a copy
+ */
+void dup(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"dup: too few arguments\n");
+
+	chunk_header* ch = vm->ds->first->data;
+	sinavm_push_front(vm->ds, ch);
+}
+
+/* pop current block off cs */
+void _break(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->cs),
+		"break: code stack empty\n");
+
+	sinavm_pop_front(vm->cs);
+}
+
 /* push 1, if two top integers have the same value, else push 0 */
 void equals(sinavm_data* vm)
 {
-    
+	error_assert(!sinavm_list_empty(vm->ds),
+		"equals: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"equals: expected integer\n");
+
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+
+	error_assert(!sinavm_list_empty(vm->ds),
+		"equals: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"equals: expected integer\n");
+
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+
+	if (a->value == b->value)
+	{
+		sinavm_push_front(vm->ds, sinavm_new_int(1));
+	}
+	else
+	{
+		sinavm_push_front(vm->ds, sinavm_new_int(0));
+	}
 }
 
 /* executes either a block or symbol (second item in ds) if the
@@ -53,20 +137,23 @@ void equals(sinavm_data* vm)
  */
 void _if(sinavm_data* vm)
 {
+	/* pop code/symbol to execute conditionally */
     error_assert(!sinavm_list_empty(vm->ds), "if: too few arguments\n");
+    chunk_header* ch = sinavm_pop_front(vm->ds);
+   
+    /* pop condition */
+	error_assert(!sinavm_list_empty(vm->ds), "if: too few arguments\n");
     error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
         "if: expected integer\n");
     
     integer_chunk* ic = (integer_chunk*) sinavm_pop_front(vm->ds);
     
-    error_assert(!sinavm_list_empty(vm->ds), "if: too few arguments\n");
-    chunk_header* ch = sinavm_pop_front(vm->ds);
-    
     if (0 != ic->value)
     {
         if (BLOCK_CHUNK == ch->type)
         {
-            sinavm_execute_block(vm, (block_chunk*) sinavm_pop_front(vm->ds));
+            sinavm_execute_block(vm, 
+				(block_chunk*) sinavm_pop_front(vm->ds));
         }
         else if (SYMBOL_CHUNK == ch->type)
         {
@@ -138,10 +225,12 @@ void add(sinavm_data* vm)
  */
 void append(sinavm_data* vm)
 {
-    error_assert(!sinavm_list_empty(vm->ds), "append: not enough arguments\n");
+    error_assert(!sinavm_list_empty(vm->ds), 
+		"append: not enough arguments\n");
     chunk_header* data = sinavm_pop_front(vm->ds);
     
-    error_assert(!sinavm_list_empty(vm->ds), "append: not enough arguments\n");
+    error_assert(!sinavm_list_empty(vm->ds),
+		"append: not enough arguments\n");
     error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
         "append: second argument must be list\n");
     
