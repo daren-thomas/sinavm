@@ -166,7 +166,7 @@ native_chunk* sinavm_new_native(native_func f)
 list_head_chunk* sinavm_new_string(char* string)
 {
 	list_head_chunk* result = sinavm_new_list();
-	for (; *string; ++string)
+	for (++string; *string != '"'; ++string)
 	{
 		int c = *string;
 		integer_chunk* i = sinavm_new_int(c);
