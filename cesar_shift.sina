@@ -1,4 +1,11 @@
 {
+	/* "if not" DS: [cond statement] */
+	swap
+	0 equals swap /* DS: [!cond statement] */
+	if
+} :unless bind
+
+{
    /* cesar shift the character  DS: [ char ] */
    dup                     /* DS: [ char char ] */
    char-is-alpha           /* DS: [ char int ] */
@@ -7,6 +14,7 @@
    'A' sub                 /* DS: [ char ] */
    1 add                   /* DS: [ char ] */
    'Z' 'A' sub mod         /* DS: [ char ] */
+   'A' add                 /* DS: [ char ] */
 } :cesar-shift-char bind
 
 {
@@ -17,8 +25,10 @@
       swap                 /* DS: [ out-list in-list ] */
       list-head            /* DS: [ out-list in-list(minus head) head ] */
       cesar-shift-char     /* DS: [ out-list in-list head ] */
+	  roll                 /* DS: [ head out-list in-list ] */
       roll                 /* DS: [ in-list head out-list ] */
-      list-prepend         /* DS: [ in-list out-list ] */
+	  swap                 /* DS: [ in-list out-list head ] */
+      list-append          /* DS: [ in-list out-list ] */
       swap                 /* DS: [ out-list in-list ] */
       dup                  /* DS: [ out-list in-list in-list ] */
       list-is-empty        /* DS: [ out-list in-list int ] */
@@ -33,12 +43,12 @@
 {
    /* execute the cesar shift algorithm on stdin, DS: [ ] */
 
-   read-line               /* DS: [ list ]
-   dup                     /* DS: [ list list ]
-   list-is-empty           /* DS: [ list int ]
+   read-line               /* DS: [ list ] */
+   dup                     /* DS: [ list list ] */
+   list-is-empty           /* DS: [ list int ] */
    :break if               /* exit current block if true, DS: [ list ] */
-   cesar-shift             /* DS: [ list ]
-   write-line              /* DS: [ ]
+   cesar-shift             /* DS: [ list ] */
+   print-line              /* DS: [ ] */
    loop                    /* redo the current block (main) */
 
 } :main bind
