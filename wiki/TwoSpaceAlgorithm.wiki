@@ -1,0 +1,21 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+This page describes the TwoSpaceAlgorithm, as it is implemented for the sinavm. As such, the algorithm might not be described as neutrally as possible, but with it's application to the task at hand in mind.
+
+
+= Details =
+
+GarbageCollectors in the sinavm implement the interface defined in {{{sina_allocator.h}}}. The TwoSpaceAlgorithm only works on half of the allowed heap size (as set by the call to {{{void allocate_heap(size_t size)}}} at a time - when it is used up, all reachable objects are copied to the second heap partition and the roles switched.
+
+So, we have two heap partitions:
+
+  * {{{current_heap}}}
+  * {{{free_heap}}}
+
+Each of these heaps has (the same) size, half the size of the reserved space for the vm.
+
+  * {{{heap_size}}}
+
+We also know the position of the next free block of memory (initially == {{{current_heap}}})
