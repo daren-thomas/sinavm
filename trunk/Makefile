@@ -17,7 +17,7 @@ build: parser $(OBJECTS)
 	cc $(OBJECTS) -o sina
 
 test: build
-	cat test.sina | ./sina test.sina
+	echo "abcdef" |  ./sina cesar_shift.sina
 
 clean:
 	rm *.o *.tab.c *.tab.h lex.yy.c *.gch

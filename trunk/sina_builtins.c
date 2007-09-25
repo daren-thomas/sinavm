@@ -11,26 +11,41 @@
 #include "sina_interpreter.h"
 #include "sinavm.h"
 #include <stdio.h>
+#include <ctype.h>
 
 /* add a function to the symbol table */
 void add_func(sinavm_data* vm, char* symbol, native_func f);
 
 void add(sinavm_data* vm);
+void sub(sinavm_data* vm);
+void mod(sinavm_data* vm);
 void append(sinavm_data* vm);
 void swap(sinavm_data* vm);
+void drop(sinavm_data* vm);
+void roll(sinavm_data* vm);
 void bind(sinavm_data* vm);
 void call(sinavm_data* vm);
 void loop(sinavm_data* vm);
 void _if(sinavm_data* vm);
 void equals(sinavm_data* vm);
 void _break(sinavm_data* vm);
-void dup(sinavm_data* vm);
-void drop(sinavm_data* vm);
+void _dup(sinavm_data* vm);
 void print_line(sinavm_data* vm);
+void read_line(sinavm_data* vm);
+void list_is_empty(sinavm_data* vm);
+void list_new(sinavm_data* vm);
+void list_head(sinavm_data* vm);
+void list_prepend(sinavm_data* vm);
+void char_is_alpha(sinavm_data* vm);
+void char_to_upper(sinavm_data* vm);
 
 void builtins_add(sinavm_data* vm) {
 	add_func(vm, "add", add);
+	add_func(vm, "sub", sub);
+	add_func(vm, "mod", mod);
 	add_func(vm, "swap", swap);
+	add_func(vm, "drop", drop);
+	add_func(vm, "roll", roll);
 	add_func(vm, "append", append);
 	add_func(vm, "bind", bind);
     add_func(vm, "call", call);
@@ -38,9 +53,16 @@ void builtins_add(sinavm_data* vm) {
     add_func(vm, "if", _if);
     add_func(vm, "equals", equals);
 	add_func(vm, "break", _break);
-	add_func(vm, "dup", dup);
-	add_func(vm, "drop", drop);
+	add_func(vm, "dup", _dup);
 	add_func(vm, "print-line", print_line);
+	add_func(vm, "read-line", read_line);
+	add_func(vm, "list-is-empty", list_is_empty);
+	add_func(vm, "list-new", list_new);
+	add_func(vm, "list-head", list_head);
+	add_func(vm, "list-prepend", list_prepend);
+	add_func(vm, "list-append", append);
+	add_func(vm, "char-is-alpha", char_is_alpha);
+	add_func(vm, "char-to-upper", char_to_upper);
 }
 
 void add_func(sinavm_data* vm, char* name, native_func f)
@@ -48,6 +70,126 @@ void add_func(sinavm_data* vm, char* name, native_func f)
 	int symbol = symbols_insert(name);
 	native_chunk* n = sinavm_new_native(f);
 	sinavm_bind(vm, symbol, (chunk_header*) n);	
+}
+
+/* convert character on top of ds to uppercase */
+void char_to_upper(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"char-to-upper: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"char-to-upper: expected integer\n");
+
+	integer_chunk* c = (integer_chunk*) sinavm_pop_front(vm->ds);
+	sinavm_push_front(vm->ds, sinavm_new_int(toupper(c->value)));
+}
+
+/* pop integer off ds. if it's an alphabetic character, push
+ * 1 onto ds, else push 0
+ */
+void char_is_alpha(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"char-is-alpha: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"char-is-alpha: expected integer\n");
+
+	integer_chunk* c = (integer_chunk*) sinavm_pop_front(vm->ds);
+	if (isalpha(c->value))
+	{
+		sinavm_push_front(vm->ds, sinavm_new_int(1));
+	}
+	else
+	{
+		sinavm_push_front(vm->ds, sinavm_new_int(0));
+	}
+}
+
+/* remove the first item from the list on top of the
+ * ds and push it onto the ds. It is an error to use
+ * list-head on an empty list.
+ */
+void list_head(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"list-head: too few arguments\n");
+	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
+		"list-head: expected list\n");
+
+	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+	
+	error_assert(!sinavm_list_empty(list),
+		"list-head: empty list\n");
+
+	chunk_header* data = sinavm_pop_front(list);
+
+	sinavm_push_front(vm->ds, list);
+	sinavm_push_front(vm->ds, data);
+}
+
+/* push object on top of ds onto front of list second from top */
+void list_prepend(sinavm_data*vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"list-prepend: too few arguments\n");
+	chunk_header* ch = sinavm_pop_front(vm->ds);
+
+	error_assert(!sinavm_list_empty(vm->ds),
+		"list-prepend: too few arguments\n");
+	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
+		"list-prepend: expected list\n");
+	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+	sinavm_push_front(list, ch);
+	sinavm_push_front(vm->ds, list);
+}
+
+/* push a new list onto ds */
+void list_new(sinavm_data* vm)
+{
+	sinavm_push_front(vm->ds, sinavm_new_list());
+}
+
+/* pop list of top of ds, check if it's empty. if it is,
+ * push 1 else push 0 onto ds.
+ */
+void list_is_empty(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"list-is-empty: too few arguments\n");
+	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
+		"list-is-empty: expected list\n");
+
+	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+	if (sinavm_list_empty(list))
+	{
+		sinavm_push_front(vm->ds, sinavm_new_int(1));
+	}
+	else
+	{
+		sinavm_push_front(vm->ds, sinavm_new_int(0));
+	}
+}
+
+/* read a line from stdin and push a list of integers
+ * representing that line onto the data stack.
+ * newline is not added to the list.
+ */
+void read_line(sinavm_data* vm)
+{
+	list_head_chunk* list = sinavm_new_list();
+	int c;
+	while (EOF != (c = getchar()))
+	{
+		if ('\n' == c)
+		{
+			break;
+		}
+		else
+		{
+			sinavm_push_back(list, sinavm_new_int(c));
+		}
+	}
+	sinavm_push_front(vm->ds, list);
 }
 
 /* print a list of integers as a series of characters,
@@ -83,14 +225,14 @@ void drop(sinavm_data* vm)
 	sinavm_pop_front(vm->ds);
 }
 
-/* duplicate top item on stack. since we have a policy of
- * not changing data, dup can simply push the *same* item
+/* _duplicate top item on stack. since we have a policy of
+ * not changing data, _dup can simply push the *same* item
  * onto front of list, as opposed to creating a copy
  */
-void dup(sinavm_data* vm)
+void _dup(sinavm_data* vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds),
-		"dup: too few arguments\n");
+		"_dup: too few arguments\n");
 
 	chunk_header* ch = vm->ds->first->data;
 	sinavm_push_front(vm->ds, ch);
@@ -206,12 +348,14 @@ void bind(sinavm_data* vm)
 /* add the two top numbers in the data stack */
 void add(sinavm_data* vm)
 {
-	error_assert(!sinavm_list_empty(vm->ds), "add: too few arguments\n");
+	error_assert(!sinavm_list_empty(vm->ds), 
+		"add: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"add: expected integer\n");
 	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
 	
-	error_assert(!sinavm_list_empty(vm->ds), "add: too few arguments\n");
+	error_assert(!sinavm_list_empty(vm->ds), 
+		"add: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"add: expected integer\n");
 	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
@@ -219,6 +363,45 @@ void add(sinavm_data* vm)
 	integer_chunk* c = sinavm_new_int(a->value + b->value);
 	sinavm_push_front(vm->ds, c);
 }
+
+/* subtract the two top numbers in the data stack */
+void sub(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds), 
+		"sub: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"sub: expected integer\n");
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	
+	error_assert(!sinavm_list_empty(vm->ds), 
+		"sub: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"sub: expected integer\n");
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+
+	integer_chunk* c = sinavm_new_int(a->value - b->value);
+	sinavm_push_front(vm->ds, c);
+}
+
+/* return the modulo of the two top numbers in the data stack */
+void mod(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds), 
+		"mod: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"mod: expected integer\n");
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	
+	error_assert(!sinavm_list_empty(vm->ds), 
+		"mod: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"mod: expected integer\n");
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+
+	integer_chunk* c = sinavm_new_int(a->value % b->value);
+	sinavm_push_front(vm->ds, c);
+}
+
 
 /* append the chunk on top of the stack to the list
  * second from top
@@ -236,6 +419,28 @@ void append(sinavm_data* vm)
     
     list_head_chunk* list = (list_head_chunk*) vm->ds->first->data;
     sinavm_push_back(list, data);
+}
+
+/* roll the top three arguments on the stack, so that
+ * the sequence (1 2 3) ends up as (2 3 1)
+ */
+void roll(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"roll: not enough arguments\n");
+	chunk_header* a = sinavm_pop_front(vm->ds);
+	
+	error_assert(!sinavm_list_empty(vm->ds),
+		"roll: not enough arguments\n");
+	chunk_header* b = sinavm_pop_front(vm->ds);
+
+	error_assert(!sinavm_list_empty(vm->ds),
+		"roll: not enough arguments\n");
+	chunk_header* c = sinavm_pop_front(vm->ds);
+
+	sinavm_push_front(vm->ds, a);
+	sinavm_push_front(vm->ds, c);
+	sinavm_push_front(vm->ds, b);
 }
 
 /* swap the too top items in the ds */
