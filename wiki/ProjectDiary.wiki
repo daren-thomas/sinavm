@@ -1,5 +1,12 @@
 #summary Documents the progress of this project.
 
+25.09.2007
+  Added all the builtins needed to run the CesarShift algorithm (debugged the CesarShift algorithm at the same time) and modified the Makefile to run it on the plaintext "abcdef". All there is left to do now is
+  * implement the GarbageCollectors
+  * devise a system for making the specific targets necessary for comparing the GCs.
+  * run some comparisons
+  * document the project
+
 19.09.2007
   The interpreter now runs a small test file - will have to implement builtins for the whole of the CesarShift algorithm, but I don't expect many problems there. 
 
