@@ -19,3 +19,7 @@ Each of these heaps has (the same) size, half the size of the reserved space for
   * {{{heap_size}}}
 
 We also know the position of the next free block of memory (initially == {{{current_heap}}})
+
+  * {{{heap_positioin}}}
+
+Garbage collection only takes place, when the size of an object that has to be allocated is too big to fit in the remaining space in the current heap.
