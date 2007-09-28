@@ -26,15 +26,14 @@ Garbage collection only takes place, when the size of an object that has to be a
 
 Garbage collection consists of moving each chunk to the {{{free_heap}}} and then swapping the {{{free_heap}}} and {{{current_heap}}} pointers. During garbage collection the {{{heap_position}}} points to the next free position in the {{{free_heap}}}.
 
-To copy a chunk to the free heap ({{{move_chunk()}}},
+To copy a chunk to the free heap ({{{move_chunk()}}}),
 
   * allocate a new chunk with same type on the {{{free_heap}}}
   * change type of old chunk to {{{MOVED_CHUNK}}} and add a pointer to the new chunk
   * for integers, symbols and escaped symbols, copy the value to the new chunk
   * for each pointer in the other types,
     * if it points to a {{{MOVED_CHUNK}}}, copy pointer to the new chunk
-    * else apply copy algorithm ({{{move_chunk()}}} to pointed-to-chunk first and 
-      then copy the pointer to the new chunk (recursion)
+    * else apply copy algorithm ({{{move_chunk()}}}) to pointed-to-chunk first and then copy the pointer to the new chunk (recursion)
   * return pointer to new chunk
 
 {{{move_chunk()}}} is applied to the DS, the CS and to each bound symbol. Any chunk not reached in this manner is considered garbage.
