@@ -11,6 +11,7 @@
 extern FILE* yyin;
 extern int yydebug;
 extern block_chunk* code;
+extern sinavm_data* parser_vm;
 
 /* start the application: parse stdin */
 int main(int argc, char** argv)
@@ -23,11 +24,15 @@ int main(int argc, char** argv)
 
 	char* sourcefile = *++argv;
 	yyin = fopen(sourcefile, "r");
-    
-    /* allocator needs to be initialized before any calls to it are made */
-    allocate_heap(1024); /* for now, we hardwire the size of the heap */
-
+   
 	sinavm_data vm;
+	parser_vm = &vm; /* parser needs vm structure for list appending */
+
+    /* allocator needs to be initialized before any calls to it are made */
+    allocate_heap(&vm, 1 * 1024); /* for now, we hardwire the heap size */
+
+	printf("heap allocated\n");
+
 	printf("before sinavm_initialize\n");
     sinavm_initialize(&vm);
 	printf("after sinavm_initialize\n");

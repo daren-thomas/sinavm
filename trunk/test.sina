@@ -1,7 +1,1 @@
-{1 add} :inc bind 1 inc inc ( 4 ) swap 3 add append 
-{ 4 append } call 
-/* test comment */
-1 { 1 add dup 10 equals :break if loop } call
-drop
-/* test strings */
-"hello, world" print-line
+1 { 1 add loop } call

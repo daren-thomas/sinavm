@@ -17,8 +17,9 @@
  */
 
 #include <stddef.h>
+#include "sinavm.h"
 
-void allocate_heap(size_t size);
+void allocate_heap(sinavm_data* vm, size_t size);
 
 void* allocate_chunk(int type);
 

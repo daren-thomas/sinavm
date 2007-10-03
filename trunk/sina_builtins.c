@@ -23,7 +23,7 @@ void append(sinavm_data* vm);
 void swap(sinavm_data* vm);
 void drop(sinavm_data* vm);
 void roll(sinavm_data* vm);
-void bind(sinavm_data* vm);
+void bind_symbol(sinavm_data* vm);
 void call(sinavm_data* vm);
 void loop(sinavm_data* vm);
 void _if(sinavm_data* vm);
@@ -47,7 +47,7 @@ void builtins_add(sinavm_data* vm) {
 	add_func(vm, "drop", drop);
 	add_func(vm, "roll", roll);
 	add_func(vm, "append", append);
-	add_func(vm, "bind", bind);
+	add_func(vm, "bind", bind_symbol);
     add_func(vm, "call", call);
     add_func(vm, "loop", loop);
     add_func(vm, "if", _if);
@@ -333,7 +333,7 @@ void call(sinavm_data* vm)
 }
 
 /* bind a symbol on the DS to the next chunk on the DS */
-void bind(sinavm_data* vm)
+void bind_symbol(sinavm_data* vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds), "bind: too few arguments\n");	
 	error_assert(SYMBOL_CHUNK == sinavm_type_front(vm->ds), 
@@ -360,8 +360,9 @@ void add(sinavm_data* vm)
 		"add: expected integer\n");
 	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
 
-	integer_chunk* c = sinavm_new_int(a->value + b->value);
-	sinavm_push_front(vm->ds, c);
+	vm->reg0 = sinavm_new_int(a->value + b->value);
+	vm->reg1 = vm->ds;	
+	sinavm_push_front(vm);
 }
 
 /* subtract the two top numbers in the data stack */

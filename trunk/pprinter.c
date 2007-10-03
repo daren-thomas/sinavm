@@ -17,9 +17,9 @@ void pprint_block(block_chunk*);
 void pprint_vm_state(sinavm_data* vm)
 {
 	printf("ds: ");
-	pprint(vm->ds); printf("\n");
+	pprint((chunk_header*) vm->ds); printf("\n");
 	printf("cs: ");
-	pprint(vm->cs); printf("\n");
+	pprint((chunk_header*) vm->cs); printf("\n");
 
 }
 

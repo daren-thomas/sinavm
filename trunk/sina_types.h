@@ -10,6 +10,7 @@
  */
 
 #include <stddef.h>
+#include "sina_error.h"
 
 #define INTEGER_CHUNK 			1
 #define SYMBOL_CHUNK 			2
@@ -23,8 +24,8 @@ typedef char chunk_type;
 typedef char chunk_colour; /* free vs. black, grey, white */
 
 typedef struct {
-	chunk_type type;
-	chunk_colour colour;
+	volatile chunk_type type;
+	volatile chunk_colour colour;
 } chunk_header;
 
 typedef struct {
@@ -44,31 +45,37 @@ typedef struct {
 
 typedef struct list_node_chunk {
 	chunk_header header;
-	chunk_header* data;
-	struct list_node_chunk* next;
+	volatile chunk_header* data;
+	volatile struct list_node_chunk* next;
 } list_node_chunk;
 
 typedef struct {
 	chunk_header header;
-	list_node_chunk* first;
-	list_node_chunk* last;
+	volatile list_node_chunk* first;
+	volatile list_node_chunk* last;
 } list_head_chunk;
 
 typedef struct {
 	chunk_header header;
-	list_head_chunk* code;
-	list_node_chunk* current;    
+	volatile list_head_chunk* code;
+	volatile list_node_chunk* current;    
 } block_chunk;
 
 /* maximum amount of symbols that can be bound */
 #define SINAVM_MAX_SYMBOLS 1024 
 
- /* datastructure used by the interpreter for the vm
-  */
+/* datastructure used by the interpreter for the vm
+ */
 typedef struct {
-    list_head_chunk* cs;
-    list_head_chunk* ds;
+    volatile list_head_chunk* cs;
+    volatile list_head_chunk* ds;
     chunk_header** bindings;
+	/* registers can be used inside builtin (native) functions
+	 * for storing temporary data, in case it gets moved during
+	 * a gc cycle. ALLWAYS USE FOR DATA ARGUMENT TO PUSH_*!!!
+	 */
+	volatile chunk_header* reg0;
+	volatile chunk_header* reg1;
     unsigned int flags;    
 } sinavm_data;
 
@@ -79,5 +86,7 @@ typedef struct {
     native_func  func;
 } native_chunk;
 
+/* returns the size of a chunk */
+size_t sizeof_chunk(int type);
 
 #endif
