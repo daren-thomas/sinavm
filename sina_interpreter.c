@@ -17,11 +17,15 @@ void execute_block(sinavm_data* vm, block_chunk* block);
  */
 void sina_interpret(sinavm_data* vm, block_chunk* code)
 {
-    sinavm_push_front(vm->cs, code);
+	vm->reg0 = (chunk_header*) code;
+	vm->reg1 = (chunk_header*) vm->cs;
+    sinavm_push_front(vm);
+	/* memento: code is not safe anymore (could have been reallocated) */
+	code = NULL;
     
     while ( ! sinavm_list_empty(vm->cs))
     {
-		printf("--------------------------------------------------------------------------------------\n");
+		printf("-----------------------------------------------------------\n");
 		pprint_vm_state(vm);
         block_chunk* current_block = (block_chunk*) vm->cs->first->data;
         if (NULL == current_block->current)
@@ -62,18 +66,26 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
         case INTEGER_CHUNK:
         case LIST_HEAD_CHUNK:
             /* push chunk onto DS */
-			sinavm_push_front(vm->ds, header);
+			vm->reg0 = header;
+			vm->reg1 = vm->ds;
+			sinavm_push_front(vm);
 			break;       
         
         case BLOCK_CHUNK:
-            /* push block onto ds, to execute a block_chunk: use 'call' or bind symbol */
-			sinavm_push_front(vm->ds, header);
+            /* push block onto ds, to execute a block_chunk: use 'call' or 
+			 * bind symbol 
+			 */
+			vm->reg0 = header;
+			vm->reg1 = vm->ds;
+			sinavm_push_front(vm);
 			break;
         
         case ESCAPED_SYMBOL_CHUNK:
 			/* push symbol onto DS */
             esym = (escaped_symbol_chunk*) header;
-            sinavm_push_front(vm->ds, sinavm_new_symbol(esym->symbol));
+			vm->reg0 = sinavm_new_symbol(esym->symbol);
+			vm->reg1 = vm->ds;
+            sinavm_push_front(vm);
 			break;
 
 		case SYMBOL_CHUNK:

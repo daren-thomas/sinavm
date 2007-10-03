@@ -42,13 +42,19 @@ list_head_chunk* sinavm_new_list()
 	return result;
 }
 
-list_head_chunk* sinavm_push_back(list_head_chunk* list, void* data)
+/* reg0: data, reg1: list */
+list_head_chunk* sinavm_push_back(sinavm_data* vm)
 {
 	list_node_chunk* node = (list_node_chunk*)
 		allocate_chunk(LIST_NODE_CHUNK);
 
-	node->data = data;
+	node->data = vm->reg0;
 	node->next = NULL;
+
+	/* allocations have happened: it is now safe to store
+	 * list pointer
+	 */
+	list_head_chunk* list = (list_head_chunk*) vm->reg1;
 
 	if (list->first == NULL) 
 	{
@@ -57,19 +63,25 @@ list_head_chunk* sinavm_push_back(list_head_chunk* list, void* data)
 	}
 	else
 	{
-		list_node_chunk* last = list->last;
+		volatile list_node_chunk* last = list->last;
 		last->next = node;
 		list->last = node;
 	}
+	vm->reg0 = NULL;
+	vm->reg1 = NULL;
 	return list;
 }
 
-list_head_chunk* sinavm_push_front(list_head_chunk* list, void* data)
+/* reg0: data, reg1: list, both NULL on return */
+list_head_chunk* sinavm_push_front(sinavm_data* vm)
 {
     list_node_chunk* node = (list_node_chunk*)
         allocate_chunk(LIST_NODE_CHUNK);
+
+	/* allocations happend, now safe to copy list pointer */
+	list_head_chunk* list = (list_head_chunk*) vm->reg1;
     
-    node->data = data;
+    node->data = vm->reg0;
     node->next = list->first;
     list->first = node;
     
@@ -78,6 +90,8 @@ list_head_chunk* sinavm_push_front(list_head_chunk* list, void* data)
         /* list was empty on call */
         list->last = node;
     }
+	vm->reg0 = NULL;
+	vm->reg1 = NULL;
     return list;
 }
 
@@ -86,7 +100,7 @@ chunk_header* sinavm_pop_front(list_head_chunk* list)
 	chunk_header* result = NULL;
     if (NULL != list->first)
     {
-		result = list->first->data;
+		result = (chunk_header*) list->first->data;
         if (list->first == list->last)
         {
             /* only one element left in list */
@@ -144,13 +158,17 @@ escaped_symbol_chunk* sinavm_new_escaped_symbol(int symbol)
 	return result;
 }
 
-block_chunk* sinavm_new_block(list_head_chunk* list)
+/* reg0: list, NULL on return */
+block_chunk* sinavm_new_block(sinavm_data* vm)
 {
 	block_chunk* result = (block_chunk*)
 		allocate_chunk(BLOCK_CHUNK);
 
+	/* allocations have happened, safe to store list pointer */
+	list_head_chunk* list = (list_head_chunk*) vm->reg0;
 	result->code = list;
 	result->current = list->first;
+	vm->reg0 = NULL;
 	return result;
 }
 
@@ -163,16 +181,17 @@ native_chunk* sinavm_new_native(native_func f)
 	return result;
 }
 
-list_head_chunk* sinavm_new_string(char* string)
+list_head_chunk* sinavm_new_string(sinavm_data* vm, char* string)
 {
-	list_head_chunk* result = sinavm_new_list();
+	list_head_chunk* list = sinavm_new_list();
 	for (++string; *string != '"'; ++string)
 	{
 		int c = *string;
-		integer_chunk* i = sinavm_new_int(c);
-		result = sinavm_push_back(result, i);
+		vm->reg1 = (chunk_header*) list;
+		vm->reg0 = (chunk_header*) sinavm_new_int(c);
+		list = sinavm_push_back(vm);
 	}
-	return result;
+	return list;
 }
 
 int sinavm_list_empty(list_head_chunk* list)
@@ -206,10 +225,16 @@ void sinavm_bind(sinavm_data* vm, int symbol, chunk_header* data)
 	}
 }
 
+/* reg0: block to execute, set to NULL on return */
 void sinavm_execute_block(sinavm_data* vm, block_chunk* block)
 {
-    block_chunk* newblock = sinavm_new_block(block->code);
-    sinavm_push_front(vm->cs, newblock);
+	/* might be moved during sinavm_new_block */
+	vm->reg0 = (chunk_header*) block->code; 
+    block_chunk* newblock = sinavm_new_block(vm);
+
+	vm->reg0 = (chunk_header*) newblock;
+	vm->reg1 = (chunk_header*) vm->cs;
+    sinavm_push_front(vm);
 }
 
 /* return 1, if the flowcontrol flag is set. This bit means, that a flow control

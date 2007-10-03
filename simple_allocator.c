@@ -10,55 +10,24 @@
 #include "sina_types.h"
 #include <stdlib.h>
 #include "sina_error.h"
+#include "sinavm.h"
 
-void allocate_heap(size_t size)
+/* leave possibilty open, to allocate heaps for each vm,
+ * (representing threads), but won't be implemented for the
+ * time being...
+ */
+void allocate_heap(sinavm_data* vm, size_t size)
 {
 	/* do nothing */
 }
 
 void* allocate_chunk(int type)
 {
-	void* result = NULL;
-	switch (type)
-	{
-		case INTEGER_CHUNK:
-			result = malloc(sizeof(integer_chunk));
-			break;
-
-		case SYMBOL_CHUNK:
-			result = malloc(sizeof(symbol_chunk));
-			break;
-
-		case ESCAPED_SYMBOL_CHUNK:
-			result = malloc(sizeof(escaped_symbol_chunk));
-			break;
-
-		case LIST_NODE_CHUNK:
-			result = malloc(sizeof(list_node_chunk));
-			break;
-
-		case LIST_HEAD_CHUNK:
-			result = malloc(sizeof(list_head_chunk));
-			break;
-
-		case BLOCK_CHUNK:
-			result = malloc(sizeof(block_chunk));
-			break;
-
-		case NATIVE_CHUNK:
-			result = malloc(sizeof(native_chunk));
-			break;
-	}
-
-	if (NULL == result)
-	{
-		error_exit("unknown chunk type\n");
-	}
-	else
-	{
-		chunk_header* header = (chunk_header*) result;
-		header->type = type;
-		header->colour = 0; /* doesn't matter for this allocator */
-	}
+	void* result = malloc(sizeof_chunk(type));
+	
+	chunk_header* header = (chunk_header*) result;
+	header->type = type;
+	header->colour = 0; /* doesn't matter for this allocator */
+	
 	return result;
 }
