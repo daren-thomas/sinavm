@@ -1,6 +1,6 @@
 OBJECTS = sina_symbols.o sinavm.o lex.yy.o pprinter.o \
           sina_parser.tab.o main.o sina_interpreter.o sina_error.o \
-		  sina_builtins.o sina_types.o
+          sina_builtins.o sina_types.o
 
 default: ALLOCATOR = twospace_allocator
 default: test
@@ -24,7 +24,8 @@ allocator:
 	cc -c -o $(ALLOCATOR).o $(ALLOCATOR).c
 
 test: build
-	echo "abcdef" |  ./sina cesar_shift.sina
+	#echo "abcdef" |  ./sina cesar_shift.sina
+	./sina test.sina
 
 clean:
 	rm -f *.o *.tab.c *.tab.h lex.yy.c *.gch
