@@ -28,6 +28,7 @@ void bind_symbol(sinavm_data* vm);
 void call(sinavm_data* vm);
 void loop(sinavm_data* vm);
 void _if(sinavm_data* vm);
+void _not(sinavm_data* vm);
 void equals(sinavm_data* vm);
 void _break(sinavm_data* vm);
 void _dup(sinavm_data* vm);
@@ -39,6 +40,8 @@ void list_head(sinavm_data* vm);
 void list_prepend(sinavm_data* vm);
 void char_is_alpha(sinavm_data* vm);
 void char_to_upper(sinavm_data* vm);
+void trace_on(sinavm_data* vm);
+void trace_off(sinavm_data* vm);
 
 void builtins_add(sinavm_data* vm) {
 	add_func(vm, "add", add);
@@ -52,6 +55,7 @@ void builtins_add(sinavm_data* vm) {
     add_func(vm, "call", call);
     add_func(vm, "loop", loop);
     add_func(vm, "if", _if);
+    add_func(vm, "not", _not);
     add_func(vm, "equals", equals);
 	add_func(vm, "break", _break);
 	add_func(vm, "dup", _dup);
@@ -64,6 +68,8 @@ void builtins_add(sinavm_data* vm) {
 	add_func(vm, "list-append", append);
 	add_func(vm, "char-is-alpha", char_is_alpha);
 	add_func(vm, "char-to-upper", char_to_upper);
+    add_func(vm, "trace-on", trace_on);
+    add_func(vm, "trace-off", trace_off);
 }
 
 void add_func(sinavm_data* vm, char* name, native_func f)
@@ -324,6 +330,17 @@ void _if(sinavm_data* vm)
     }    
 }
 
+/* does bitwise One's complement on the top integer */
+void _not(sinavm_data* vm)
+{
+    error_assert(!sinavm_list_empty(vm->ds), "not: too few arguments\n");
+    error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+        "not: expected integer\n");
+    
+    integer_chunk* ic = (integer_chunk*) sinavm_pop_front(vm->ds);
+    sinavm_push_front(vm->ds, sinavm_new_int(~(ic->value)));
+}
+
 /* redo the current block (does not alter the cs) */
 void loop(sinavm_data* vm)
 {
@@ -489,4 +506,16 @@ void swap(sinavm_data* vm)
 			sinavm_push_front(vm->ds, allocate_pop_register());
 		}
 	}
+}
+
+/* set the trace flag on */
+void trace_on(sinavm_data* vm)
+{
+    sinavm_trace_set(vm);
+}
+
+/* turn the trace flag off (default) */
+void trace_off(sinavm_data* vm)
+{
+    sinavm_trace_unset(vm);
 }

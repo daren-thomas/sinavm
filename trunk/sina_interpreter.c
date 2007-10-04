@@ -25,9 +25,12 @@ void sina_interpret(sinavm_data* vm, block_chunk* code)
     
     while ( ! sinavm_list_empty(vm->cs))
     {
-/* 		printf("-----------------------------------------------------------\n");
- * 		pprint_vm_state(vm);
- */
+        if (sinavm_trace_get(vm))
+        {
+ 		    printf("-----------------------------------------------------------\n");
+ 		    pprint_vm_state(vm);
+        }
+
         block_chunk* current_block = (block_chunk*) vm->cs->first->data;
         if (NULL == current_block->current)
         {

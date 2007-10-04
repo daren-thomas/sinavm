@@ -115,4 +115,10 @@ void sinavm_flowcontrol_set(sinavm_data* vm);
  */
 void sinavm_flowcontrol_unset(sinavm_data* vm);
 
+/* control the trace flag */
+int sinavm_trace_get(sinavm_data* vm);
+void sinavm_trace_set(sinavm_data* vm);
+void sinavm_trace_unset(sinavm_data* vm);
+
+
 #endif
