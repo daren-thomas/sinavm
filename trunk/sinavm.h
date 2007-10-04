@@ -24,22 +24,14 @@ list_head_chunk* sinavm_new_list();
 /*
  * append a new node to the end of the list and have that
  * node point to data.
- * vm->reg0 contains the data to be pushed
- * vm->reg1 contains the list to push onto
- *
- * reg0 and reg1 will be set to NULL on return
  */
-list_head_chunk* sinavm_push_back(sinavm_data* vm);
+list_head_chunk* sinavm_push_back(list_head_chunk* list, chunk_header* data);
 
 /*
  * append a new node to the front of the list and have that node
  * point to data.
- * vm->reg0 contains the data to be pushed
- * vm->reg1 contains the list to push onto
- *
- * reg0 and reg1 will be set to NULL on return
  */
-list_head_chunk* sinavm_push_front(sinavm_data* vm);
+list_head_chunk* sinavm_push_front(list_head_chunk* list, chunk_header* data);
 
 /*
  * pop the first item off the list and return pointer to nodes data. 
@@ -64,9 +56,8 @@ symbol_chunk* sinavm_new_symbol(int symbol);
 
 /* create a list of integers for a given string and
  * return a pointer to that list.
- * needs reference to vm, since it uses sinavm_push_back
- */
-list_head_chunk* sinavm_new_string(sinavm_data* vm, char* string);
+  */
+list_head_chunk* sinavm_new_string(char* string);
 
 /* create escaped symbol cell and the symbol cell for it.
  * return a pointer to it.
@@ -76,10 +67,8 @@ escaped_symbol_chunk* sinavm_new_escaped_symbol(int symbol);
 /*
  * allocate a new block chunk and use this list. Set the
  * current node pointer to the first element in the list
- *
- * vm->reg0 must be set to a list, NULL on return
  */
-block_chunk* sinavm_new_block(sinavm_data* vm);
+block_chunk* sinavm_new_block(list_head_chunk* code);
 
 /*
  * allocate a new native func chunk.

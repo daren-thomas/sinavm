@@ -45,20 +45,20 @@ typedef struct {
 
 typedef struct list_node_chunk {
 	chunk_header header;
-	volatile chunk_header* data;
-	volatile struct list_node_chunk* next;
+	chunk_header* data;
+	struct list_node_chunk* next;
 } list_node_chunk;
 
 typedef struct {
 	chunk_header header;
-	volatile list_node_chunk* first;
-	volatile list_node_chunk* last;
+	list_node_chunk* first;
+	list_node_chunk* last;
 } list_head_chunk;
 
 typedef struct {
 	chunk_header header;
-	volatile list_head_chunk* code;
-	volatile list_node_chunk* current;    
+	list_head_chunk* code;
+	list_node_chunk* current;    
 } block_chunk;
 
 /* maximum amount of symbols that can be bound */
@@ -67,15 +67,9 @@ typedef struct {
 /* datastructure used by the interpreter for the vm
  */
 typedef struct {
-    volatile list_head_chunk* cs;
-    volatile list_head_chunk* ds;
+    list_head_chunk* cs;
+    list_head_chunk* ds;
     chunk_header** bindings;
-	/* registers can be used inside builtin (native) functions
-	 * for storing temporary data, in case it gets moved during
-	 * a gc cycle. ALLWAYS USE FOR DATA ARGUMENT TO PUSH_*!!!
-	 */
-	volatile chunk_header* reg0;
-	volatile chunk_header* reg1;
     unsigned int flags;    
 } sinavm_data;
 
