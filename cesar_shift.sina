@@ -1,15 +1,8 @@
 {
-	/* "if not" DS: [cond statement] */
-	swap
-	0 equals swap /* DS: [!cond statement] */
-	if
-} :unless bind
-
-{
    /* cesar shift the character  DS: [ char ] */
    dup                     /* DS: [ char char ] */
-   char-is-alpha           /* DS: [ char int ] */
-   :break unless           /* DS: [ char ] */
+   char-is-alpha not       /* DS: [ char int ] */
+   :break if               /* DS: [ char ] */
    char-to-upper           /* DS: [ char ] */
    'A' sub                 /* DS: [ char ] */
    1 add                   /* DS: [ char ] */

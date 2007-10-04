@@ -257,3 +257,19 @@ void sinavm_flowcontrol_unset(sinavm_data* vm)
 {
     vm->flags = vm->flags & ~SINAVM_FLAGS_FLOWCONTROL;
 }
+
+#define SINAVM_FLAGS_TRACE 2
+int sinavm_trace_get(sinavm_data* vm)
+{
+    return vm->flags & SINAVM_FLAGS_TRACE;
+}
+
+void sinavm_trace_set(sinavm_data* vm)
+{
+    vm->flags = vm->flags | SINAVM_FLAGS_TRACE;
+}
+
+void sinavm_trace_unset(sinavm_data* vm)
+{
+    vm->flags = vm->flags & ~SINAVM_FLAGS_TRACE;
+}
