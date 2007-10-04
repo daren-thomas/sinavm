@@ -10,6 +10,7 @@
 #include "sina_symbols.h"
 #include "sina_interpreter.h"
 #include "sinavm.h"
+#include "sina_allocator.h"
 #include <stdio.h>
 #include <ctype.h>
 
@@ -81,7 +82,8 @@ void char_to_upper(sinavm_data* vm)
 		"char-to-upper: expected integer\n");
 
 	integer_chunk* c = (integer_chunk*) sinavm_pop_front(vm->ds);
-	sinavm_push_front(vm->ds, sinavm_new_int(toupper(c->value)));
+    c = sinavm_new_int(toupper(c->value));    
+    sinavm_push_front(vm->ds, (chunk_header*) c);
 }
 
 /* pop integer off ds. if it's an alphabetic character, push
@@ -97,11 +99,11 @@ void char_is_alpha(sinavm_data* vm)
 	integer_chunk* c = (integer_chunk*) sinavm_pop_front(vm->ds);
 	if (isalpha(c->value))
 	{
-		sinavm_push_front(vm->ds, sinavm_new_int(1));
+		sinavm_push_front(vm->ds, (chunk_header*) sinavm_new_int(1));
 	}
 	else
 	{
-		sinavm_push_front(vm->ds, sinavm_new_int(0));
+		sinavm_push_front(vm->ds, (chunk_header*) sinavm_new_int(0));
 	}
 }
 
@@ -116,15 +118,19 @@ void list_head(sinavm_data* vm)
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"list-head: expected list\n");
 
-	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
-	
-	error_assert(!sinavm_list_empty(list),
+	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);	
+    
+    allocate_push_register((chunk_header*) list);    
+	error_assert(!sinavm_list_empty(list), /* invalidates list */
 		"list-head: empty list\n");
-
+    list = (list_head_chunk*) allocate_pop_register();
+    
 	chunk_header* data = sinavm_pop_front(list);
 
-	sinavm_push_front(vm->ds, list);
-	sinavm_push_front(vm->ds, data);
+    allocate_push_register(data);    
+	sinavm_push_front(vm->ds, (chunk_header*) list); /* invalidates list and data */
+    data = allocate_pop_register();
+	sinavm_push_front(vm->ds, data); /* invalidates list and data */
 }
 
 /* push object on top of ds onto front of list second from top */
@@ -138,15 +144,17 @@ void list_prepend(sinavm_data*vm)
 		"list-prepend: too few arguments\n");
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"list-prepend: expected list\n");
-	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
-	sinavm_push_front(list, ch);
-	sinavm_push_front(vm->ds, list);
+    
+	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);    
+	list = sinavm_push_front(list, ch); /* invalidates list and ch */
+	sinavm_push_front(vm->ds, (chunk_header*) list);
 }
 
 /* push a new list onto ds */
 void list_new(sinavm_data* vm)
 {
-	sinavm_push_front(vm->ds, sinavm_new_list());
+    list_head_chunk* list = sinavm_new_list();
+	sinavm_push_front(vm->ds, (chunk_header*) list);
 }
 
 /* pop list of top of ds, check if it's empty. if it is,
@@ -160,14 +168,16 @@ void list_is_empty(sinavm_data* vm)
 		"list-is-empty: expected list\n");
 
 	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+    integer_chunk* boolval;
 	if (sinavm_list_empty(list))
 	{
-		sinavm_push_front(vm->ds, sinavm_new_int(1));
+        boolval = sinavm_new_int(1);
 	}
 	else
 	{
-		sinavm_push_front(vm->ds, sinavm_new_int(0));
+        boolval = sinavm_new_int(0);
 	}
+    sinavm_push_front(vm->ds, (chunk_header*) boolval);
 }
 
 /* read a line from stdin and push a list of integers
@@ -186,10 +196,14 @@ void read_line(sinavm_data* vm)
 		}
 		else
 		{
-			sinavm_push_back(list, sinavm_new_int(c));
+            allocate_push_register((chunk_header*) list);
+            integer_chunk* i = sinavm_new_int(c); /* invalidates list */
+            list = (list_head_chunk*) allocate_pop_register();
+            
+			list = sinavm_push_back(list, (chunk_header*) i);
 		}
 	}
-	sinavm_push_front(vm->ds, list);
+	sinavm_push_front(vm->ds, (chunk_header*) list);
 }
 
 /* print a list of integers as a series of characters,
@@ -264,14 +278,16 @@ void equals(sinavm_data* vm)
 
 	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
 
+    integer_chunk* boolvalue;
 	if (a->value == b->value)
 	{
-		sinavm_push_front(vm->ds, sinavm_new_int(1));
+        boolvalue = sinavm_new_int(1);
 	}
 	else
 	{
-		sinavm_push_front(vm->ds, sinavm_new_int(0));
+        boolvalue = sinavm_new_int(0);
 	}
+    sinavm_push_front(vm->ds, (chunk_header*) boolvalue);
 }
 
 /* executes either a block or symbol (second item in ds) if the
@@ -294,14 +310,12 @@ void _if(sinavm_data* vm)
     {
         if (BLOCK_CHUNK == ch->type)
         {
-            sinavm_execute_block(vm, 
-				(block_chunk*) sinavm_pop_front(vm->ds));
+            sinavm_execute_block(vm, (block_chunk*) ch);
         }
         else if (SYMBOL_CHUNK == ch->type)
         {
             /* symbol must be either bound to block or to native */
-            symbol_chunk* sc = (symbol_chunk*) ch;
-            sina_interpret_symbol(vm, sc->symbol);
+            sina_interpret_symbol(vm, ((symbol_chunk*) ch)->symbol);
         }
         else
         {
@@ -360,9 +374,8 @@ void add(sinavm_data* vm)
 		"add: expected integer\n");
 	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
 
-	vm->reg0 = sinavm_new_int(a->value + b->value);
-	vm->reg1 = vm->ds;	
-	sinavm_push_front(vm);
+    integer_chunk* c = sinavm_new_int(a->value + b->value);
+	sinavm_push_front(vm->ds, (chunk_header*) c);
 }
 
 /* subtract the two top numbers in the data stack */
@@ -381,7 +394,7 @@ void sub(sinavm_data* vm)
 	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
 
 	integer_chunk* c = sinavm_new_int(a->value - b->value);
-	sinavm_push_front(vm->ds, c);
+	sinavm_push_front(vm->ds, (chunk_header*) c);
 }
 
 /* return the modulo of the two top numbers in the data stack */
@@ -400,7 +413,7 @@ void mod(sinavm_data* vm)
 	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
 
 	integer_chunk* c = sinavm_new_int(a->value % b->value);
-	sinavm_push_front(vm->ds, c);
+	sinavm_push_front(vm->ds, (chunk_header*) c);
 }
 
 
@@ -423,7 +436,7 @@ void append(sinavm_data* vm)
 }
 
 /* roll the top three arguments on the stack, so that
- * the sequence (1 2 3) ends up as (2 3 1)
+ * the sequence (a b c) ends up as (b c a)
  */
 void roll(sinavm_data* vm)
 {
@@ -439,9 +452,14 @@ void roll(sinavm_data* vm)
 		"roll: not enough arguments\n");
 	chunk_header* c = sinavm_pop_front(vm->ds);
 
-	sinavm_push_front(vm->ds, a);
-	sinavm_push_front(vm->ds, c);
-	sinavm_push_front(vm->ds, b);
+    /* appending a, b and c with push front will invalidate the rest */
+    allocate_push_register(b);
+    allocate_push_register(c); 
+    allocate_push_register(a);
+        
+	sinavm_push_front(vm->ds, allocate_pop_register());
+	sinavm_push_front(vm->ds, allocate_pop_register());
+	sinavm_push_front(vm->ds, allocate_pop_register());
 }
 
 /* swap the too top items in the ds */
@@ -453,8 +471,8 @@ void swap(sinavm_data* vm)
 	}
 	else
 	{
-		chunk_header* a = vm->ds->first->data;
-		sinavm_pop_front(vm->ds);
+		chunk_header* a = sinavm_pop_front(vm->ds);
+		
 
 		if (sinavm_list_empty(vm->ds))
 		{
@@ -462,10 +480,13 @@ void swap(sinavm_data* vm)
 		}
 		else
 		{
-			chunk_header* b = vm->ds->first->data;
-			sinavm_pop_front(vm->ds);
-			sinavm_push_front(vm->ds, a);
-			sinavm_push_front(vm->ds, b);
+			chunk_header* b = sinavm_pop_front(vm->ds);
+			
+            allocate_push_register(b);
+            allocate_push_register(a);
+            
+			sinavm_push_front(vm->ds, allocate_pop_register());
+			sinavm_push_front(vm->ds, allocate_pop_register());
 		}
 	}
 }

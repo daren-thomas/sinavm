@@ -21,12 +21,6 @@ int yywrap()
 /* gets set by parsing the program */
 block_chunk* code;
 
-/* vm structure needed for appending lists (uses vm registers to guard
- * garbage collection cycles against moving the lists before appending
- * them...
- */
-sinavm_data* parser_vm;
-
 %}
 
 /* list of tokens for the sina grammar */
@@ -48,8 +42,7 @@ sinavm_data* parser_vm;
 program: 
 	list_elements 
 		{ 
-			parser_vm->reg0 = $1;
-			$$ = sinavm_new_block(parser_vm);
+			$$ = sinavm_new_block($1);
 			code = $$;
 		} 
 	;
@@ -58,9 +51,7 @@ list_elements:
 	/* empty */ { $$ = sinavm_new_list(); }
 	| list_elements list_element
 		{
-			parser_vm->reg0 = $2;
-			parser_vm->reg1 = $1;
-			$$ = sinavm_push_back(parser_vm);
+			$$ = sinavm_push_back($1, $2);
 		}
 	;
 
@@ -70,7 +61,7 @@ list_element:
 	| block				{ $$ = $1; }
 	| escaped_symbol	{ $$ = $1; }
 	| SYMBOL			{ $$ = sinavm_new_symbol($1); }
-	| STRING			{ $$ = sinavm_new_string(parser_vm, $1); }
+	| STRING			{ $$ = sinavm_new_string($1); }
 	;
 
 list: OPEN_PAREN list_elements CLOSE_PAREN 
@@ -80,8 +71,7 @@ list: OPEN_PAREN list_elements CLOSE_PAREN
 	;
 block: OPEN_CURLY list_elements CLOSE_CURLY 
 	{
-		parser_vm->reg0 = $2;
-		$$ = sinavm_new_block(parser_vm);
+		$$ = sinavm_new_block($2);
 	}
 	;
 escaped_symbol: COLON SYMBOL 

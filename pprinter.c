@@ -61,12 +61,12 @@ void pprint_integer(integer_chunk* chunk)
 
 void pprint_symbol(symbol_chunk* chunk)
 {
-	printf(" symbol<%s> ", symbols_find(chunk->symbol));
+	printf(" %s ", symbols_find(chunk->symbol));
 }
 
 void pprint_escaped_symbol(escaped_symbol_chunk* chunk)
 {
-	printf(" :symbol<%s> ", symbols_find(chunk->symbol));
+	printf(" :%s ", symbols_find(chunk->symbol));
 }
 
 void pprint_list_head(list_head_chunk* chunk)
