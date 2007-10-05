@@ -1,5 +1,10 @@
 #summary Documents the progress of this project.
 
+05.10.2007
+  Implemented the TwoSpaceAlgorithm in {{{twospace_allocator.c}}} and changed the {{{Makefile}}} to allow building both versions (TwoSpaceAlgorithm and a simpler version that does no collection in {{{simple_allocator.c}}}).
+  
+  Came across an interesting problem with the TwoSpaceAlgorithm: Due to the way sinavm works, certain functions (like {{{sinavm_push_front()}}}) allocate multiple pointers to chunks on heap before returning. For instance: Allocating an {{{INTEGER_CHUNK}}} and pushing it onto the DataStack requires having the integer chunk in a local variable and then using {{{sinavm_push_front()}}} to push it onto the DataStack. This allocates a {{{LIST_NODE_CHUNK}}} to store the integer chunk in, and, if that triggers a GarbageCollectionCycle, the integer chunk will not be moved (as it is not reachable from the RootSet). This is a subtle and very hard to find error. To fix it, I implemented a RegisterStack, which is part of the RootSet. Any internal functions that hold references to chunks not reachable by the RootSet must push those chunks onto the RegisterStack before doing any operation that might trigger a GarbageCollectionCycle. This is probably not strictly necessary for the ConcurrentGarbageCollector (i.e., it will ignore the RegisterStack since it doesn't move any chunks anyway - defragmentation of memory will be handled in a much simpler way: all chunks will have the same size). Alas, the RegisterStack, as it is implemented now ({{{sina_allocator.c}}}) is not threadsafe, and does not allow the interpreter to run multiple [VirtualMachine]s.
+
 25.09.2007
   Added all the builtins needed to run the CesarShift algorithm (debugged the CesarShift algorithm at the same time) and modified the Makefile to run it on the plaintext "abcdef". All there is left to do now is
   * implement the GarbageCollectors
