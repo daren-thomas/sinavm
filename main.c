@@ -29,12 +29,7 @@ int main(int argc, char** argv)
 
     /* allocator needs to be initialized before any calls to it are made */
     allocate_heap(&vm, 64 * 1024); /* for now, we hardwire the heap size */
-
-	printf("heap allocated\n");
-
-	printf("before sinavm_initialize\n");
     sinavm_initialize(&vm);
-	printf("after sinavm_initialize\n");
 	pprint_vm_state(&vm);
 
 	/* start parsing, result will be a block in the variable

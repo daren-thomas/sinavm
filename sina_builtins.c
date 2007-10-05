@@ -32,7 +32,7 @@ void _not(sinavm_data* vm);
 void equals(sinavm_data* vm);
 void _break(sinavm_data* vm);
 void _dup(sinavm_data* vm);
-void print_line(sinavm_data* vm);
+void print_string(sinavm_data* vm);
 void read_line(sinavm_data* vm);
 void list_is_empty(sinavm_data* vm);
 void list_new(sinavm_data* vm);
@@ -59,7 +59,7 @@ void builtins_add(sinavm_data* vm) {
     add_func(vm, "equals", equals);
 	add_func(vm, "break", _break);
 	add_func(vm, "dup", _dup);
-	add_func(vm, "print-line", print_line);
+	add_func(vm, "print-string", print_string);
 	add_func(vm, "read-line", read_line);
 	add_func(vm, "list-is-empty", list_is_empty);
 	add_func(vm, "list-new", list_new);
@@ -188,7 +188,7 @@ void list_is_empty(sinavm_data* vm)
 
 /* read a line from stdin and push a list of integers
  * representing that line onto the data stack.
- * newline is not added to the list.
+ * newline is added to the list.
  */
 void read_line(sinavm_data* vm)
 {
@@ -196,44 +196,41 @@ void read_line(sinavm_data* vm)
 	int c;
 	while (EOF != (c = getchar()))
 	{
+		allocate_push_register((chunk_header*) list);
+		integer_chunk* i = sinavm_new_int(c); /* invalidates list */
+		list = (list_head_chunk*) allocate_pop_register();
+		
+		list = sinavm_push_back(list, (chunk_header*) i);
+
 		if ('\n' == c)
 		{
 			break;
-		}
-		else
-		{
-            allocate_push_register((chunk_header*) list);
-            integer_chunk* i = sinavm_new_int(c); /* invalidates list */
-            list = (list_head_chunk*) allocate_pop_register();
-            
-			list = sinavm_push_back(list, (chunk_header*) i);
 		}
 	}
 	sinavm_push_front(vm->ds, (chunk_header*) list);
 }
 
 /* print a list of integers as a series of characters,
- * append a newline */
-void print_line(sinavm_data* vm)
+ */
+void print_string(sinavm_data* vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds),
-		"print-line: too few arguments\n");
+		"print-string: too few arguments\n");
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
-		"print-line: expected list\n");
+		"print-string: expected list\n");
 
 	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
 	list_node_chunk* node = list->first;
 	while (NULL != node)
 	{
 		error_assert(INTEGER_CHUNK == node->data->type,
-			"print-line: expected list of integers\n");
+			"print-string: expected list of integers\n");
 
 		integer_chunk* c = (integer_chunk*) node->data;
 		putchar(c->value);
 
 		node = node->next;
 	}
-	putchar('\n');
 }
 
 /* drop topmost chunk from data stack */
@@ -330,7 +327,7 @@ void _if(sinavm_data* vm)
     }    
 }
 
-/* does bitwise One's complement on the top integer */
+/* if top of ds = 0, then push 1, else push 0 */
 void _not(sinavm_data* vm)
 {
     error_assert(!sinavm_list_empty(vm->ds), "not: too few arguments\n");
@@ -338,7 +335,16 @@ void _not(sinavm_data* vm)
         "not: expected integer\n");
     
     integer_chunk* ic = (integer_chunk*) sinavm_pop_front(vm->ds);
-    sinavm_push_front(vm->ds, sinavm_new_int(~(ic->value)));
+	integer_chunk* notic;
+	if (0 == ic->value)
+	{
+		notic = sinavm_new_int(1);	
+	}
+	else
+	{
+		notic = sinavm_new_int(0);
+	}
+    sinavm_push_front(vm->ds, notic);
 }
 
 /* redo the current block (does not alter the cs) */

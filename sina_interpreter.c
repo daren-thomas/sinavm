@@ -87,7 +87,7 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 			/* push symbol onto DS */
             esym = (escaped_symbol_chunk*) header;
             symbol = sinavm_new_symbol(esym->symbol); /* invalidates header */        
-            sinavm_push_front(vm->ds, symbol);
+            sinavm_push_front(vm->ds, (chunk_header*) symbol);
 			break;
 
 		case SYMBOL_CHUNK:

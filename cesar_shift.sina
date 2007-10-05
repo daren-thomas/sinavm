@@ -41,7 +41,7 @@
    list-is-empty           /* DS: [ list int ] */
    :break if               /* exit current block if true, DS: [ list ] */
    cesar-shift             /* DS: [ list ] */
-   print-line              /* DS: [ ] */
+   print-string            /* DS: [ ] */
    loop                    /* redo the current block (main) */
 
 } :main bind
