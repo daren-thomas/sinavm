@@ -344,7 +344,7 @@ void _not(sinavm_data* vm)
 	{
 		notic = sinavm_new_int(0);
 	}
-    sinavm_push_front(vm->ds, notic);
+    sinavm_push_front(vm->ds, (chunk_header*) notic);
 }
 
 /* redo the current block (does not alter the cs) */

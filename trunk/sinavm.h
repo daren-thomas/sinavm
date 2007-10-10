@@ -11,10 +11,14 @@
  */
 #include "sina_types.h"
 
+/* these hooks into sinavm_push/pop_front could be set by the allocator for monitoring
+ * changes to DS/CS */
+extern list_head_chunk* (*sinavm_push_front_hook)(list_head_chunk* list, chunk_header* data);
+extern list_head_chunk* (*sinavm_pop_front_hook)(list_head_chunk* list);
+
 /* initializes a sina_vm structure 
  */
 void sinavm_initialize(sinavm_data* vm);
-
 
 /*
  * create a new list and return a pointer to it.
