@@ -44,5 +44,3 @@ This is acceptable during execution of the program as it is not possible to know
 == Heap ==
 
 The heap is regarded as an iterable array. Thus, each chunk needs to be the same size (the size can't be determined by checking it's type, since this could result in race conditions and also: what is the size of a free (green) chunk?). This wastes some space (INTEGER_CHUNKS, SYMBOL_CHUNKS etc. are 1 word smaller than LIST_HEAD_CHUNKS, LIST_NODE_CHUNKS and BLOCK_CHUNKS), but it is necessary for the collector to be able to iterate over all chunks.
-
-The heap is initialized to a 
