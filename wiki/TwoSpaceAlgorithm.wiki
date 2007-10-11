@@ -1,4 +1,4 @@
-#summary Outline of the TwoSpaceAlgorithm
+#summary Description of the TwoSpaceAlgorithm
 
 = Introduction =
 
