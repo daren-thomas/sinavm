@@ -17,6 +17,7 @@
  * changes to DS/CS */
 list_head_chunk* (*sinavm_push_front_hook)(list_head_chunk* list, chunk_header* data) = NULL;
 list_head_chunk* (*sinavm_pop_front_hook)(list_head_chunk* list)  = NULL;
+list_head_chunk* (*sinavm_push_back_hook)(list_head_chunk* list, chunk_header* data) = NULL;
 
 void sinavm_initialize(sinavm_data* vm)
 {
@@ -44,6 +45,11 @@ list_head_chunk* sinavm_new_list()
 
 list_head_chunk* sinavm_push_back(list_head_chunk* list, chunk_header* data)
 {
+	if (sinavm_push_back_hook)
+	{
+		list = sinavm_push_back_hook(list, data);
+	}
+
     allocate_push_register((chunk_header*) list);
     allocate_push_register(data);
         
@@ -75,7 +81,7 @@ list_head_chunk* sinavm_push_front(list_head_chunk* list, chunk_header* data)
 {
     if (sinavm_push_front_hook)
     {
-        sinavm_push_front_hook(list, data);
+        list = sinavm_push_front_hook(list, data);
     }
     
     allocate_push_register((chunk_header*) list);
@@ -103,7 +109,7 @@ chunk_header* sinavm_pop_front(list_head_chunk* list)
 {
     if (sinavm_pop_front_hook)
     {
-        sinavm_pop_front_hook(list);    
+        list = sinavm_pop_front_hook(list);    
     }
     
 	chunk_header* result = NULL;

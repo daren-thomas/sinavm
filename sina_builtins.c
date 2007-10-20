@@ -121,6 +121,7 @@ void list_head(sinavm_data* vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds),
 		"list-head: too few arguments\n");
+	printf("list-head: type of vm->ds = %d\n", sinavm_type_front(vm->ds));
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"list-head: expected list\n");
 
