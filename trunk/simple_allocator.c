@@ -24,6 +24,7 @@ void allocate_heap(sinavm_data* vm, size_t size)
 	/* set up dummy hooks for push/pop to test them */
     sinavm_push_front_hook = my_push_hook;
     sinavm_pop_front_hook = my_pop_hook;
+	sinavm_push_back_hook = my_push_hook;
 }
 
 void* allocate_chunk(int type)
@@ -40,9 +41,11 @@ void* allocate_chunk(int type)
 list_head_chunk* my_push_hook(list_head_chunk* list, chunk_header* data)
 {
     printf("In my_push_hook\n");
+	return list;
 }
 
 list_head_chunk* my_pop_hook(list_head_chunk* list)
 {
     printf("In my_pop_hook\n");
+	return list;
 }

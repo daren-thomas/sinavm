@@ -15,6 +15,7 @@
  * changes to DS/CS */
 extern list_head_chunk* (*sinavm_push_front_hook)(list_head_chunk* list, chunk_header* data);
 extern list_head_chunk* (*sinavm_pop_front_hook)(list_head_chunk* list);
+extern list_head_chunk* (*sinavm_push_back_hook)(list_head_chunk* list, chunk_header* data);
 
 /* initializes a sina_vm structure 
  */

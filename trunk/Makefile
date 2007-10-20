@@ -2,11 +2,16 @@ OBJECTS = sina_symbols.o sinavm.o lex.yy.o pprinter.o \
           sina_parser.tab.o main.o sina_interpreter.o sina_error.o \
           sina_builtins.o sina_types.o sina_allocator.o
 
-default: ALLOCATOR = twospace_allocator
-default: test
+default: concurrent
 
 simple: ALLOCATOR = simple_allocator
 simple: test
+
+twospace: ALLOCATOR = twospace_allocator
+twospace: test
+
+concurrent: ALLOCATOR = concurrent_allocator
+concurrent: test
 
 parser: lexer sina_parser.y
 	bison -d sina_parser.y
@@ -18,13 +23,13 @@ lexer: sina_lexer.l
 	flex sina_lexer.l
 
 build: parser allocator $(OBJECTS) 
-	cc $(ALLOCATOR).o $(OBJECTS) -o sina
+	cc $(ALLOCATOR).o $(OBJECTS) -o sina -lpthread
 
 allocator:
 	cc -c -o $(ALLOCATOR).o $(ALLOCATOR).c
 
 test: build
-	echo "abcdef" |  ./sina cesar_shift.sina
+	cat abcdefg.txt |  ./sina cesar_shift.sina
 	#./sina test.sina
 
 clean:
