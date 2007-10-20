@@ -25,7 +25,7 @@ typedef char chunk_colour; /* free vs. black, grey, white */
 
 typedef struct {
 	volatile chunk_type type;
-	volatile chunk_colour colour;
+	olatile chunk_colour colour;
 } chunk_header;
 
 typedef struct {
