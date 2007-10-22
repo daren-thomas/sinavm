@@ -101,6 +101,7 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 			break;
         
         default:
+			printf("interpret_chunk: unknown type=%s, colour=%s\n", header->type, header->colour);
             error_exit("cannot interpret chunk with unknown type.");
     }
 }
