@@ -42,8 +42,8 @@ int flag_freelist_ready    = 0; /* true, when collector has copied freelist */
 pthread_mutex_t mutex_freelist_ready   = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t  cond_freelist_ready    = PTHREAD_COND_INITIALIZER;
 
-/* the different colour values. black and white can be swaped using
- * collector_swap_black_white(), but only when in control of
+/* the different colour values. black and white can be swaped by
+ * the collector, but only when in control of
  * mutex_freelist_ready
  */
 volatile int black_value   = 0; /* volatile suppresses optimization (const) */
@@ -100,7 +100,7 @@ void* allocate_chunk(int type)
 	result->next = NULL; /* clean up memory, this can be omitted */
 	result->data = NULL;
 
-	result->header.colour = black_value;
+	result->header.colour = grey_value;
 	result->header.type = type;
 	return result;
 }
@@ -288,7 +288,6 @@ chunk_header* collector_find_grey_chunk(chunk_header* chunk)
 	
 	if (grey_value == c->header.colour)
 	{
-		printf("collector_find_grey_chunk: found grey chunk!\n");
 		return (chunk_header*) c;
 	}
 	else
@@ -302,7 +301,6 @@ chunk_header* collector_find_grey_chunk(chunk_header* chunk)
 
 			if (grey_value == c->header.colour)
 			{
-				printf("collector_find_grey_chunk: found grey chunk!\n");
 				return (chunk_header*) c;
 			}
 		}
