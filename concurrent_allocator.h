@@ -74,4 +74,11 @@ void collector_darken_chunk(chunk_header* chunk);
  */
 void collector_build_collector_list();
 
+/* called just after swapping colours, before collector walks the
+ * heap: Any chunks in the registers are possibly not accessible and
+ * have just had their colours turned white. Prevent them from being
+ * collected by colouring them grey.
+ */
+void collector_colour_registers_grey();
+
 #endif

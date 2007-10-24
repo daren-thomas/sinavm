@@ -406,15 +406,19 @@ void add(sinavm_data* vm)
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"add: expected integer\n");
 	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+	printf("add: popped a\n");
 	
 	error_assert(!sinavm_list_empty(vm->ds), 
 		"add: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"add: expected integer\n");
 	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	printf("add: popped b\n");
 
     integer_chunk* c = sinavm_new_int(a->value + b->value);
+	printf("add: created c\n");
 	sinavm_push_front(vm->ds, (chunk_header*) c);
+	printf("add: pushed c onto ds\n");	
 }
 
 /* subtract the two top numbers in the data stack */

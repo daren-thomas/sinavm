@@ -231,6 +231,12 @@ void* collector_main(void* args)
 		printf("collector_main: swapped colours\n");
 		collector_print_heap();
 
+		/* BUG FIX: any chunks in the registers might not be accessible
+		   and have just been coloured white (by swapping colours).
+		   Colour them grey to be sure the are not collected.
+		 */
+		collector_colour_registers_grey();
+
 		pthread_cond_signal(&cond_freelist_ready);
 		pthread_mutex_unlock(&mutex_freelist_ready);
 
@@ -418,6 +424,16 @@ void collector_build_collector_list()
 		}
 	}
 	printf("collector_build_collector_list: end\n");
+}
+
+void collector_colour_registers_grey()
+{
+	int i = 0;
+	for (i = 0; i < sina_allocator_next_free_register; ++i)
+	{
+		chunk_header* chunk = sina_allocator_register[i];
+		chunk->colour = grey_value;
+	}
 }
 
 void collector_print_heap()

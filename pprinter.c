@@ -13,6 +13,7 @@ void pprint_symbol(symbol_chunk*);
 void pprint_escaped_symbol(escaped_symbol_chunk*);
 void pprint_list_head(list_head_chunk*);
 void pprint_block(block_chunk*);
+void pprint_native(native_chunk*);
 
 void pprint_vm_state(sinavm_data* vm)
 {
@@ -47,6 +48,10 @@ void pprint(chunk_header* chunk)
 
 		case BLOCK_CHUNK:
 			pprint_block((block_chunk*) chunk);
+			break;
+
+		case NATIVE_CHUNK:
+			pprint_native((native_chunk*) chunk);
 			break;
 
 		default:
@@ -89,4 +94,9 @@ void pprint_block(block_chunk* chunk)
 		pprint((chunk_header*) node->data);
 	}
 	printf(" } ");
+}
+
+void pprint_native(native_chunk* native)
+{
+	printf("native<%x>", native->func);
 }

@@ -1,0 +1,4 @@
+/* symbols.sina: test garbage collector with symbols */
+{ 1 add } :inc bind
+{ inc dup print-int loop } :inc-loop bind
+1 inc-loop
