@@ -1,1 +1,1 @@
-1 { 1 add loop } call
+1 { 1 add dup print-int loop } call

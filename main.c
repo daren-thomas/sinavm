@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 	sinavm_data vm;
 
     /* allocator needs to be initialized before any calls to it are made */
-    allocate_heap(&vm, 64 * 1024); /* for now, we hardwire the heap size */
+    allocate_heap(&vm, 16 * 1024); /* for now, we hardwire the heap size */
     sinavm_initialize(&vm);
 	pprint_vm_state(&vm);
 

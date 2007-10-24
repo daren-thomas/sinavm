@@ -33,6 +33,7 @@ void equals(sinavm_data* vm);
 void _break(sinavm_data* vm);
 void _dup(sinavm_data* vm);
 void print_string(sinavm_data* vm);
+void print_int(sinavm_data* vm);
 void read_line(sinavm_data* vm);
 void list_is_empty(sinavm_data* vm);
 void list_new(sinavm_data* vm);
@@ -60,6 +61,7 @@ void builtins_add(sinavm_data* vm) {
 	add_func(vm, "break", _break);
 	add_func(vm, "dup", _dup);
 	add_func(vm, "print-string", print_string);
+	add_func(vm, "print-int", print_int);
 	add_func(vm, "read-line", read_line);
 	add_func(vm, "list-is-empty", list_is_empty);
 	add_func(vm, "list-new", list_new);
@@ -232,6 +234,19 @@ void print_string(sinavm_data* vm)
 
 		node = node->next;
 	}
+}
+
+/* print an integer 
+ */
+void print_int(sinavm_data* vm)
+{
+	error_assert(!sinavm_list_empty(vm->ds),
+		"print-int: too few arguments\n");
+	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
+		"print-int: expected integer\n");
+
+	integer_chunk* i = (integer_chunk*) sinavm_pop_front(vm->ds);
+	printf("%d\n", i->value);
 }
 
 /* drop topmost chunk from data stack */
