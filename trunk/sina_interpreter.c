@@ -27,7 +27,7 @@ void sina_interpret(sinavm_data* vm, block_chunk* code)
     {
         if (sinavm_trace_get(vm))
         {
- 		    printf("-----------------------------------------------------------\n");
+ 		    printf("-------------------------------------------------------\n");
  		    pprint_vm_state(vm);
         }
 
@@ -42,7 +42,8 @@ void sina_interpret(sinavm_data* vm, block_chunk* code)
             allocate_push_register((chunk_header*) current_block);
             
             list_node_chunk* current = current_block->current;
-            interpret_chunk(vm, current->data); /* invalidates current and current_block */
+			/* invalidates current and current_block */
+            interpret_chunk(vm, current->data); 
             
             current_block = (block_chunk*) allocate_pop_register();
             
@@ -68,6 +69,13 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
     escaped_symbol_chunk*  esym     = NULL;
     symbol_chunk*          symbol   = NULL;
 	native_chunk*		   native	= NULL;
+
+	if (sinavm_trace_get(vm))
+	{
+		printf("interpret_chunk: interpreting ");
+		pprint(header); printf(" ds="); pprint(vm->ds);
+		printf("\n");
+	}
     
     switch (header->type)
     {
@@ -101,9 +109,14 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 			break;
         
         default:
-			printf("interpret_chunk: unknown type=%s, colour=%s\n", header->type, header->colour);
+			printf("interpret_chunk: unknown type=%s, colour=%s\n", 
+				header->type, header->colour);
             error_exit("cannot interpret chunk with unknown type.");
     }
+	if (sinavm_trace_get(vm))
+	{
+		printf("interpret_chunk: done.\n");
+	}
 }
 
 /* symbols need to be interpreted specially (see sina_interpreter.h) */

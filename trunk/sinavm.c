@@ -148,8 +148,10 @@ int sinavm_type_front(list_head_chunk* list)
 
 integer_chunk* sinavm_new_int(int value)
 {
+	printf("sinavm_new_int: allocating chunk\n");
 	integer_chunk* result = (integer_chunk*)
 		allocate_chunk(INTEGER_CHUNK);
+	printf("sinavm_new_int: allocated chunk\n");
 
 	result->value = value;
 	return result;
