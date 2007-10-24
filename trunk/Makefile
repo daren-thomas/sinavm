@@ -29,8 +29,8 @@ allocator:
 	cc -c -o $(ALLOCATOR).o $(ALLOCATOR).c
 
 test: build
-	#cat abcdefg.txt |  ./sina cesar_shift.sina
-	./sina test.sina
+	cat abcdefg.txt |  ./sina cesar_shift.sina
+	#./sina test.sina
 
 clean:
 	rm -f *.o *.tab.c *.tab.h lex.yy.c *.gch
