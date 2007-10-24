@@ -30,7 +30,7 @@ allocator:
 
 test: build
 	cat abcdefg.txt |  ./sina cesar_shift.sina
-	#./sina test.sina
+	#./sina symbols.sina
 
 clean:
 	rm -f *.o *.tab.c *.tab.h lex.yy.c *.gch

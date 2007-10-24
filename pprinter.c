@@ -17,10 +17,9 @@ void pprint_native(native_chunk*);
 
 void pprint_vm_state(sinavm_data* vm)
 {
-	printf("ds: ");
-	pprint((chunk_header*) vm->ds); printf("\n");
-	printf("cs: ");
-	pprint((chunk_header*) vm->cs); printf("\n");
+	chunk_header* chunk = (chunk_header*) vm->ds;
+	printf("ds: "); pprint(chunk); printf("\n");
+	printf("cs: "); pprint((chunk_header*) vm->cs); printf("\n");
 
 }
 
@@ -78,6 +77,7 @@ void pprint_list_head(list_head_chunk* chunk)
 {
 	printf(" ( ");
 	list_node_chunk* node;
+
 	for (node = chunk->first; node != NULL; node = node->next)
 	{
 		pprint((chunk_header*) node->data);
@@ -99,4 +99,33 @@ void pprint_block(block_chunk* chunk)
 void pprint_native(native_chunk* native)
 {
 	printf("native<%x>", native->func);
+}
+
+void pprint_chunk_info(chunk_header* chunk)
+{
+	int type = chunk->type;
+	int colour = chunk->colour;
+
+	/* HACK: LIST_NODE_CHUNK is big enough to hold them all... */
+	list_node_chunk* node = (list_node_chunk*) chunk;
+
+	switch (type)
+	{
+		case INTEGER_CHUNK:
+		case SYMBOL_CHUNK:
+		case ESCAPED_SYMBOL_CHUNK:
+		case NATIVE_CHUNK:
+			printf("<t=%d c=%d v=%d>", type, colour, node->next);
+			break;
+
+		case LIST_HEAD_CHUNK:
+		case LIST_NODE_CHUNK:
+		case BLOCK_CHUNK:
+			printf("<t=%d c=%d v1=%x v2=%x>", type, colour, 
+				node->next, node->data);
+
+		default:
+			printf("pprint_chunk_info: unknown type %d, colour=%d", 
+				type, colour);
+	}
 }

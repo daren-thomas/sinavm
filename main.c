@@ -30,7 +30,7 @@ int main(int argc, char** argv)
     /* allocator needs to be initialized before any calls to it are made */
     allocate_heap(&vm, 4 * 1024); /* for now, we hardwire the heap size */
     sinavm_initialize(&vm);
-	sinavm_trace_set(&vm);
+	sinavm_trace_unset(&vm);
 	pprint_vm_state(&vm);
 
 	/* start parsing, result will be a block in the variable

@@ -12,6 +12,9 @@
 /* determines the type of chunk and pretty prints it */
 void pprint(chunk_header* chunk);
 
+/* print type, colour and data from chunk */
+void pprint_chunk_info(chunk_header* chunk);
+
 /* prints a representation of the virtual machine to stdout */
 void pprint_vm_state(sinavm_data* vm);
 
