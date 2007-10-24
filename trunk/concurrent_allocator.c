@@ -19,6 +19,8 @@
 #include "sina_symbols.h"
 #include "sinavm.h"
 #include "concurrent_allocator.h"
+
+void collector_print_heap();
  
 /* the free_list is read and written by allocator until it points to NULL,
  * then synchronisation with collector thread takes place, and while collector
@@ -28,7 +30,7 @@
 free_chunk* free_list      = NULL;
 free_chunk* collector_list = NULL;
 
-size_t      count_chunks   = 0; /* size of heap (amount of chunks allocatable) */
+size_t      count_chunks   = 0; /* size of heap (amount of chunks allocatable)*/
 free_chunk* heap           = NULL;
 
 /* we need a copy of the vm to know the rootset */
@@ -61,10 +63,14 @@ void allocate_heap(sinavm_data* _vm, size_t size)
 	vm = _vm;
 
 	count_chunks = size / sizeof(free_chunk);
-	heap = malloc(count_chunks);
+	heap = malloc(count_chunks * sizeof(free_chunk));
 	free_list = allocate_chunk_list(heap, count_chunks / 2);
 	flag_freelist_empty = 0;
-	collector_list = allocate_chunk_list(heap + count_chunks / 2, count_chunks / 2);
+	collector_list = allocate_chunk_list(heap + count_chunks / 2, 
+		count_chunks / 2);
+
+	printf("allocate_heap: allocated chunk lists\n");
+	collector_print_heap();
 
 	/* set up hooks for monitoring changes made by monitor
 	 * (in essence, anytime a list gets pushed / popped, darken the
@@ -77,6 +83,8 @@ void allocate_heap(sinavm_data* _vm, size_t size)
 	pthread_t collector_thread = NULL;
 	int rc = pthread_create(&collector_thread, NULL, collector_main, NULL);
 	error_assert(rc == 0, "allocate_heap: failed to create collector thread\n");
+	printf("allocate_heap: started collector thread\n");
+	collector_print_heap();
 }
 
 /* allocating is easy, if the free_list still has chunks left: pop
@@ -100,7 +108,7 @@ void* allocate_chunk(int type)
 	result->next = NULL; /* clean up memory, this can be omitted */
 	result->data = NULL;
 
-	result->header.colour = grey_value;
+	result->header.colour = black_value;
 	result->header.type = type;
 	return result;
 }
@@ -202,6 +210,7 @@ void* collector_main(void* args)
 				"collector_main: expeced flag_freelist_empty = 1\n");
 		}
 		printf("collector_main: free_list is empty\n");
+		collector_print_heap();
 		flag_freelist_empty = 0; /* we now know the list was empty */
 		pthread_mutex_unlock(&mutex_freelist_empty);
 
@@ -220,6 +229,7 @@ void* collector_main(void* args)
 		black_value = white_value;
 		white_value = temp;
 		printf("collector_main: swapped colours\n");
+		collector_print_heap();
 
 		pthread_cond_signal(&cond_freelist_ready);
 		pthread_mutex_unlock(&mutex_freelist_ready);
@@ -242,8 +252,10 @@ void collector_collect_garbage()
 	chunk_header* chunk = (chunk_header*) heap;
 	while (NULL != (chunk = collector_find_grey_chunk(chunk)))
 	{
-		if (chunk == (chunk_header*) vm->ds) printf("collector_collect_garbage: grey DS\n");
-		if (chunk == (chunk_header*) vm->cs) printf("collector_collect_garbage: grey CS\n");
+		if (chunk == (chunk_header*) vm->ds) 
+			printf("collector_collect_garbage: grey DS\n");
+		if (chunk == (chunk_header*) vm->cs) 
+			printf("collector_collect_garbage: grey CS\n");
 
 		collector_darken_successors(chunk);
 		chunk->colour = black_value;
@@ -305,7 +317,9 @@ chunk_header* collector_find_grey_chunk(chunk_header* chunk)
 			}
 		}
 		/* cycled through all chunks in heap, c == chunk */
-		printf("collector_find_grey_chunk: could not find any grey chunks in heap...\n");
+		printf("collector_find_grey_chunk: could not find any grey chunks"
+			   "in heap...\n");
+		collector_print_heap();
 		return NULL;
 	}
 }
@@ -404,4 +418,23 @@ void collector_build_collector_list()
 		}
 	}
 	printf("collector_build_collector_list: end\n");
+}
+
+void collector_print_heap()
+{
+/*
+	printf("\ncollector_print_heap: black=%d, white=%d\n",
+		black_value, white_value);
+	free_chunk* chunk = heap;
+	free_chunk* end_of_heap = heap + count_chunks;
+	for (; chunk < end_of_heap; ++chunk)
+	{
+		volatile free_chunk* c = chunk;
+		volatile int type = c->header.type;
+		volatile int colour = c->header.colour;
+		printf("%x\t%d\t%d\t%x\t%x\n", chunk - heap,
+			colour, type, 
+			c->next, c->data);
+	}
+*/
 }
