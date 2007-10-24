@@ -108,7 +108,7 @@ void* allocate_chunk(int type)
 	result->next = NULL; /* clean up memory, this can be omitted */
 	result->data = NULL;
 
-	result->header.colour = black_value;
+	result->header.colour = grey_value;
 	result->header.type = type;
 	return result;
 }
@@ -228,7 +228,8 @@ void* collector_main(void* args)
 		int temp = black_value;
 		black_value = white_value;
 		white_value = temp;
-		printf("collector_main: swapped colours\n");
+		printf("collector_main: swapped colours, black is now %d\n",
+			black_value);
 		collector_print_heap();
 
 		/* BUG FIX: any chunks in the registers might not be accessible
@@ -323,7 +324,7 @@ chunk_header* collector_find_grey_chunk(chunk_header* chunk)
 			}
 		}
 		/* cycled through all chunks in heap, c == chunk */
-		printf("collector_find_grey_chunk: could not find any grey chunks"
+		printf("collector_find_grey_chunk: could not find any grey chunks "
 			   "in heap...\n");
 		collector_print_heap();
 		return NULL;
@@ -371,6 +372,7 @@ void collector_darken_successors(chunk_header* chunk)
 			break;
 
 		default:
+			pprint_chunk_info(chunk);
 			error_exit("collector_darken_successors: unknown chunk type\n");
 	}
 }

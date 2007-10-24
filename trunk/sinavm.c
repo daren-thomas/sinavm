@@ -89,7 +89,7 @@ list_head_chunk* sinavm_push_front(list_head_chunk* list, chunk_header* data)
     
     list_node_chunk* node = (list_node_chunk*)
         allocate_chunk(LIST_NODE_CHUNK); /* invalidates list and data */
-    
+   	
     data = allocate_pop_register();
     list = (list_head_chunk*) allocate_pop_register();    
     
@@ -148,10 +148,8 @@ int sinavm_type_front(list_head_chunk* list)
 
 integer_chunk* sinavm_new_int(int value)
 {
-	printf("sinavm_new_int: allocating chunk\n");
 	integer_chunk* result = (integer_chunk*)
 		allocate_chunk(INTEGER_CHUNK);
-	printf("sinavm_new_int: allocated chunk\n");
 
 	result->value = value;
 	return result;
