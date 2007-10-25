@@ -80,7 +80,7 @@ void allocate_heap(sinavm_data* _vm, size_t size)
 	sinavm_push_back_hook  = mutator_push_hook;
 
 	/* start the collector thread */
-	pthread_t collector_thread = NULL;
+	pthread_t collector_thread;
 	int rc = pthread_create(&collector_thread, NULL, collector_main, NULL);
 	error_assert(rc == 0, "allocate_heap: failed to create collector thread\n");
 	printf("allocate_heap: started collector thread\n");
