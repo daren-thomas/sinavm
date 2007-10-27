@@ -301,11 +301,6 @@ void collector_collect_garbage()
 	chunk_header* chunk = (chunk_header*) heap;
 	while (NULL != (chunk = collector_find_grey_chunk(chunk)))
 	{
-		if (chunk == (chunk_header*) vm->ds) 
-			printf("collector_collect_garbage: grey DS\n");
-		if (chunk == (chunk_header*) vm->cs) 
-			printf("collector_collect_garbage: grey CS\n");
-
 		collector_darken_successors(chunk);
 		chunk->colour = black_value;
 	}
