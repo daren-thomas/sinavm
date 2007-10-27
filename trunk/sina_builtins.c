@@ -89,9 +89,10 @@ void char_to_upper(sinavm_data* vm)
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"char-to-upper: expected integer\n");
 
-	integer_chunk* c = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* c = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
     c = sinavm_new_int(toupper(c->value));    
     sinavm_push_front(vm->ds, (chunk_header*) c);
+	allocate_pop_register();
 }
 
 /* pop integer off ds. if it's an alphabetic character, push
@@ -102,11 +103,10 @@ void char_is_alpha(sinavm_data* vm)
 	error_assert(!sinavm_list_empty(vm->ds),
 		"char-is-alpha: too few arguments\n");
 	int type = sinavm_type_front(vm->ds);
-	printf("char-is-alpha: type=%d\n", type);
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"char-is-alpha: expected integer\n");
 
-	integer_chunk* c = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* c = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 	if (isalpha(c->value))
 	{
 		sinavm_push_front(vm->ds, (chunk_header*) sinavm_new_int(1));
@@ -115,6 +115,7 @@ void char_is_alpha(sinavm_data* vm)
 	{
 		sinavm_push_front(vm->ds, (chunk_header*) sinavm_new_int(0));
 	}
+	allocate_pop_register();
 }
 
 /* remove the first item from the list on top of the
@@ -125,23 +126,23 @@ void list_head(sinavm_data* vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds),
 		"list-head: too few arguments\n");
-	printf("list-head: type of vm->ds = %d\n", sinavm_type_front(vm->ds));
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"list-head: expected list\n");
 
-	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);	
+	list_head_chunk* list = (list_head_chunk*) 
+		sinavm_pop_front_to_register( vm->ds);	
     
-    allocate_push_register((chunk_header*) list);    
 	error_assert(!sinavm_list_empty(list), /* invalidates list */
 		"list-head: empty list\n");
-    list = (list_head_chunk*) allocate_pop_register();
     
-	chunk_header* data = sinavm_pop_front(list);
+	chunk_header* data = sinavm_pop_front_to_register(list);
 
     allocate_push_register(data);    
 	sinavm_push_front(vm->ds, (chunk_header*) list); /* invalidates list and data */
     data = allocate_pop_register();
 	sinavm_push_front(vm->ds, data); /* invalidates list and data */
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* push object on top of ds onto front of list second from top */
@@ -149,16 +150,19 @@ void list_prepend(sinavm_data*vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds),
 		"list-prepend: too few arguments\n");
-	chunk_header* ch = sinavm_pop_front(vm->ds);
+	chunk_header* ch = sinavm_pop_front_to_register(vm->ds);
 
 	error_assert(!sinavm_list_empty(vm->ds),
 		"list-prepend: too few arguments\n");
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"list-prepend: expected list\n");
     
-	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);    
+	list_head_chunk* list = (list_head_chunk*) 
+		sinavm_pop_front_to_register(vm->ds);    
 	list = sinavm_push_front(list, ch); /* invalidates list and ch */
 	sinavm_push_front(vm->ds, (chunk_header*) list);
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* push a new list onto ds */
@@ -178,7 +182,8 @@ void list_is_empty(sinavm_data* vm)
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"list-is-empty: expected list\n");
 
-	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+	list_head_chunk* list = (list_head_chunk*) 
+		sinavm_pop_front_to_register(vm->ds);
     integer_chunk* boolval;
 	if (sinavm_list_empty(list))
 	{
@@ -189,6 +194,7 @@ void list_is_empty(sinavm_data* vm)
         boolval = sinavm_new_int(0);
 	}
     sinavm_push_front(vm->ds, (chunk_header*) boolval);
+	allocate_pop_register();
 }
 
 /* read a line from stdin and push a list of integers
@@ -224,7 +230,8 @@ void print_string(sinavm_data* vm)
 	error_assert(LIST_HEAD_CHUNK == sinavm_type_front(vm->ds),
 		"print-string: expected list\n");
 
-	list_head_chunk* list = (list_head_chunk*) sinavm_pop_front(vm->ds);
+	list_head_chunk* list = (list_head_chunk*) 
+		sinavm_pop_front_to_register(vm->ds);
 	list_node_chunk* node = list->first;
 	while (NULL != node)
 	{
@@ -236,6 +243,7 @@ void print_string(sinavm_data* vm)
 
 		node = node->next;
 	}
+	allocate_pop_register();
 }
 
 /* print an integer 
@@ -247,8 +255,8 @@ void print_int(sinavm_data* vm)
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"print-int: expected integer\n");
 
-	integer_chunk* i = (integer_chunk*) sinavm_pop_front(vm->ds);
-	printf("%d\n", i->value);
+	integer_chunk* i = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
+	allocate_pop_register();
 }
 
 /* drop topmost chunk from data stack */
@@ -290,14 +298,14 @@ void equals(sinavm_data* vm)
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"equals: expected integer\n");
 
-	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 
 	error_assert(!sinavm_list_empty(vm->ds),
 		"equals: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"equals: expected integer\n");
 
-	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 
     integer_chunk* boolvalue;
 	if (a->value == b->value)
@@ -309,6 +317,8 @@ void equals(sinavm_data* vm)
         boolvalue = sinavm_new_int(0);
 	}
     sinavm_push_front(vm->ds, (chunk_header*) boolvalue);
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* executes either a block or symbol (second item in ds) if the
@@ -318,14 +328,14 @@ void _if(sinavm_data* vm)
 {
 	/* pop code/symbol to execute conditionally */
     error_assert(!sinavm_list_empty(vm->ds), "if: too few arguments\n");
-    chunk_header* ch = sinavm_pop_front(vm->ds);
+    chunk_header* ch = sinavm_pop_front_to_register(vm->ds);
    
     /* pop condition */
 	error_assert(!sinavm_list_empty(vm->ds), "if: too few arguments\n");
     error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
         "if: expected integer\n");
     
-    integer_chunk* ic = (integer_chunk*) sinavm_pop_front(vm->ds);
+    integer_chunk* ic = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
     
     if (0 != ic->value)
     {
@@ -343,6 +353,8 @@ void _if(sinavm_data* vm)
             error_exit("if: expected block or symbol\n");
         }
     }    
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* if top of ds = 0, then push 1, else push 0 */
@@ -352,7 +364,7 @@ void _not(sinavm_data* vm)
     error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
         "not: expected integer\n");
     
-    integer_chunk* ic = (integer_chunk*) sinavm_pop_front(vm->ds);
+    integer_chunk* ic = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 	integer_chunk* notic;
 	if (0 == ic->value)
 	{
@@ -363,6 +375,7 @@ void _not(sinavm_data* vm)
 		notic = sinavm_new_int(0);
 	}
     sinavm_push_front(vm->ds, (chunk_header*) notic);
+	allocate_pop_register();
 }
 
 /* redo the current block (does not alter the cs) */
@@ -383,8 +396,9 @@ void call(sinavm_data* vm)
     error_assert(!sinavm_list_empty(vm->ds), "call: too few arguments\n");
     error_assert(BLOCK_CHUNK == sinavm_type_front(vm->ds),
         "call: expected block\n");
-    block_chunk* bc = (block_chunk*) sinavm_pop_front(vm->ds);
+    block_chunk* bc = (block_chunk*) sinavm_pop_front_to_register(vm->ds);
     sinavm_execute_block(vm, bc);    
+	allocate_pop_register();
 }
 
 /* bind a symbol on the DS to the next chunk on the DS */
@@ -393,11 +407,13 @@ void bind_symbol(sinavm_data* vm)
 	error_assert(!sinavm_list_empty(vm->ds), "bind: too few arguments\n");	
 	error_assert(SYMBOL_CHUNK == sinavm_type_front(vm->ds), 
 		"bind: expected symbol\n");
-	symbol_chunk* sc = (symbol_chunk*) sinavm_pop_front(vm->ds);	
+	symbol_chunk* sc = (symbol_chunk*) sinavm_pop_front_to_register(vm->ds);	
 	int symbol = sc->symbol;
-
 	error_assert(!sinavm_list_empty(vm->ds), "bind: too few arguments\n");
-	sinavm_bind(vm, symbol, sinavm_pop_front(vm->ds));
+	chunk_header* data = sinavm_pop_front_to_register(vm->ds);
+	sinavm_bind(vm, symbol, data);
+	allocate_pop_register(); /* symbol */
+	allocate_pop_register(); /* data   */
 }
 
 /* add the two top numbers in the data stack */
@@ -407,16 +423,19 @@ void add(sinavm_data* vm)
 		"add: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"add: expected integer\n");
-	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 	
 	error_assert(!sinavm_list_empty(vm->ds), 
 		"add: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"add: expected integer\n");
-	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 
     integer_chunk* c = sinavm_new_int(a->value + b->value);
 	sinavm_push_front(vm->ds, (chunk_header*) c);
+
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* subtract the two top numbers in the data stack */
@@ -426,16 +445,18 @@ void sub(sinavm_data* vm)
 		"sub: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"sub: expected integer\n");
-	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 	
 	error_assert(!sinavm_list_empty(vm->ds), 
 		"sub: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"sub: expected integer\n");
-	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 
 	integer_chunk* c = sinavm_new_int(a->value - b->value);
 	sinavm_push_front(vm->ds, (chunk_header*) c);
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* return the modulo of the two top numbers in the data stack */
@@ -445,16 +466,18 @@ void mod(sinavm_data* vm)
 		"mod: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"mod: expected integer\n");
-	integer_chunk* b = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* b = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 	
 	error_assert(!sinavm_list_empty(vm->ds), 
 		"mod: too few arguments\n");
 	error_assert(INTEGER_CHUNK == sinavm_type_front(vm->ds),
 		"mod: expected integer\n");
-	integer_chunk* a = (integer_chunk*) sinavm_pop_front(vm->ds);
+	integer_chunk* a = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
 
 	integer_chunk* c = sinavm_new_int(a->value % b->value);
 	sinavm_push_front(vm->ds, (chunk_header*) c);
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 
@@ -465,7 +488,7 @@ void append(sinavm_data* vm)
 {
     error_assert(!sinavm_list_empty(vm->ds), 
 		"append: not enough arguments\n");
-    chunk_header* data = sinavm_pop_front(vm->ds);
+    chunk_header* data = sinavm_pop_front_to_register(vm->ds);
     
     error_assert(!sinavm_list_empty(vm->ds),
 		"append: not enough arguments\n");
@@ -474,6 +497,8 @@ void append(sinavm_data* vm)
     
     list_head_chunk* list = (list_head_chunk*) vm->ds->first->data;
     sinavm_push_back(list, data);
+
+	allocate_pop_register();
 }
 
 /* roll the top three arguments on the stack, so that
@@ -483,15 +508,15 @@ void roll(sinavm_data* vm)
 {
 	error_assert(!sinavm_list_empty(vm->ds),
 		"roll: not enough arguments\n");
-	chunk_header* a = sinavm_pop_front(vm->ds);
+	chunk_header* a = sinavm_pop_front_to_register(vm->ds);
 	
 	error_assert(!sinavm_list_empty(vm->ds),
 		"roll: not enough arguments\n");
-	chunk_header* b = sinavm_pop_front(vm->ds);
+	chunk_header* b = sinavm_pop_front_to_register(vm->ds);
 
 	error_assert(!sinavm_list_empty(vm->ds),
 		"roll: not enough arguments\n");
-	chunk_header* c = sinavm_pop_front(vm->ds);
+	chunk_header* c = sinavm_pop_front_to_register(vm->ds);
 
     /* appending a, b and c with push front will invalidate the rest */
     allocate_push_register(b);
@@ -501,6 +526,9 @@ void roll(sinavm_data* vm)
 	sinavm_push_front(vm->ds, allocate_pop_register());
 	sinavm_push_front(vm->ds, allocate_pop_register());
 	sinavm_push_front(vm->ds, allocate_pop_register());
+	allocate_pop_register();
+	allocate_pop_register();
+	allocate_pop_register();
 }
 
 /* swap the too top items in the ds */
@@ -512,7 +540,7 @@ void swap(sinavm_data* vm)
 	}
 	else
 	{
-		chunk_header* a = sinavm_pop_front(vm->ds);
+		chunk_header* a = sinavm_pop_front_to_register(vm->ds);
 		
 
 		if (sinavm_list_empty(vm->ds))
@@ -521,13 +549,16 @@ void swap(sinavm_data* vm)
 		}
 		else
 		{
-			chunk_header* b = sinavm_pop_front(vm->ds);
+			chunk_header* b = sinavm_pop_front_to_register(vm->ds);
 			
             allocate_push_register(b);
             allocate_push_register(a);
             
 			sinavm_push_front(vm->ds, allocate_pop_register());
 			sinavm_push_front(vm->ds, allocate_pop_register());
+
+			allocate_pop_register();
+			allocate_pop_register();
 		}
 	}
 }

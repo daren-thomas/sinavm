@@ -76,7 +76,10 @@ void* allocate_chunk(int type)
 /* implements the TwoSpaceAlgorithm as described in the wiki */
 void collect_garbage()
 {
-    printf("INFO: collecting_garbage\n");
+	if (sinavm_trace_get(rootset))
+	{
+    	printf("INFO: collecting_garbage\n");
+	}
 	heap_position = free_heap;
 
 	/* move all the chunks to the new current heap */

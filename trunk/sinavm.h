@@ -11,11 +11,15 @@
  */
 #include "sina_types.h"
 
-/* these hooks into sinavm_push/pop_front could be set by the allocator for monitoring
- * changes to DS/CS */
-extern list_head_chunk* (*sinavm_push_front_hook)(list_head_chunk* list, chunk_header* data);
-extern list_head_chunk* (*sinavm_pop_front_hook)(list_head_chunk* list);
-extern list_head_chunk* (*sinavm_push_back_hook)(list_head_chunk* list, chunk_header* data);
+/* these hooks into sinavm_push/pop_front could be set by the allocator 
+ * for monitoring changes to DS/CS 
+ */
+extern list_head_chunk* (*sinavm_push_front_hook)(
+	list_head_chunk* list, chunk_header* data);
+extern list_head_chunk* (*sinavm_push_back_hook)(
+	list_head_chunk* list, chunk_header* data);
+extern list_head_chunk* (*sinavm_pop_front_to_register_hook)(
+	list_head_chunk* list);
 
 /* initializes a sina_vm structure 
  */
@@ -39,10 +43,18 @@ list_head_chunk* sinavm_push_back(list_head_chunk* list, chunk_header* data);
 list_head_chunk* sinavm_push_front(list_head_chunk* list, chunk_header* data);
 
 /*
- * pop the first item off the list and return pointer to nodes data. 
- * If the list is empty, return NULL.
+ * pop the first item off the list. This discards the node: if it is not
+ * referenced anywhere else, it will be collected and reused. 
  */
-chunk_header* sinavm_pop_front(list_head_chunk* list);
+void sinavm_pop_front(list_head_chunk* list);
+
+/*
+ * pop the first item off the list and return it. The item stays reachable
+ * at all times since it is pushed onto the register. Must be popped of
+ * the register!
+ * If list is empty, returns NULL.
+ */
+chunk_header* sinavm_pop_front_to_register(list_head_chunk* list);
 
 /* return the type of the first item in the list. If the list is
  * empty, return -1 (invalid type value)
