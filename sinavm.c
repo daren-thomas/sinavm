@@ -15,9 +15,12 @@
 
 /* these hooks into sinavm_push/pop_front could be set by the allocator for monitoring
  * changes to DS/CS */
-list_head_chunk* (*sinavm_push_front_hook)(list_head_chunk* list, chunk_header* data) = NULL;
-list_head_chunk* (*sinavm_pop_front_hook)(list_head_chunk* list)  = NULL;
-list_head_chunk* (*sinavm_push_back_hook)(list_head_chunk* list, chunk_header* data) = NULL;
+list_head_chunk* (*sinavm_push_front_hook)(
+	list_head_chunk* list, chunk_header* data) = NULL;
+list_head_chunk* (*sinavm_pop_front_to_register_hook)(
+	list_head_chunk* list)  = NULL;
+list_head_chunk* (*sinavm_push_back_hook)(
+	list_head_chunk* list, chunk_header* data) = NULL;
 
 void sinavm_initialize(sinavm_data* vm)
 {
@@ -105,17 +108,21 @@ list_head_chunk* sinavm_push_front(list_head_chunk* list, chunk_header* data)
     return list;
 }
 
-chunk_header* sinavm_pop_front(list_head_chunk* list)
+chunk_header* sinavm_pop_front_to_register(list_head_chunk* list)
 {
-    if (sinavm_pop_front_hook)
+    if (sinavm_pop_front_to_register_hook)
     {
-        list = sinavm_pop_front_hook(list);    
+        list = sinavm_pop_front_to_register_hook(list);    
     }
     
 	chunk_header* result = NULL;
     if (NULL != list->first)
     {
-		result = (chunk_header*) list->first->data;
+		result = list->first->data;
+		
+		/* make sure it's pushed to the register first!!! */
+		allocate_push_register(result);
+
         if (list->first == list->last)
         {
             /* only one element left in list */
@@ -131,6 +138,27 @@ chunk_header* sinavm_pop_front(list_head_chunk* list)
 	else
 	{
 		return NULL;
+	}
+}
+
+void sinavm_pop_front(list_head_chunk* list)
+{
+    if (NULL != list->first)
+    {
+        if (list->first == list->last)
+        {
+            /* only one element left in list */
+            list->first = NULL;
+            list->last  = NULL;
+        }
+        else
+        {
+            list->first = list->first->next;
+        }
+    }
+	else
+	{
+		/* do nothing */
 	}
 }
 

@@ -31,6 +31,11 @@ void mutator_await_free_list();
  */
 list_head_chunk* mutator_push_hook(list_head_chunk* list, chunk_header* data);
 
+/* whenever pop_front_to_register is called by the interpreter, we
+ * change the colour of the front nodes data to grey and return the list.
+ */
+list_head_chunk* mutator_pop_register_hook(list_head_chunk* list);
+
 /* implements the collector thread, as explained in the wiki */
 void* collector_main(void*);
 
@@ -77,7 +82,6 @@ void collector_build_collector_list();
 /* called just after swapping colours, before collector walks the
  * heap: Any chunks in the registers are possibly not accessible and
  * have just had their colours turned white. Prevent them from being
- * collected by colouring them grey.
  */
 void collector_colour_registers_grey();
 

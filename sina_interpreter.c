@@ -44,7 +44,6 @@ void sina_interpret(sinavm_data* vm, block_chunk* code)
             list_node_chunk* current = current_block->current;
 			/* invalidates current and current_block */
             interpret_chunk(vm, current->data); 
-            
             current_block = (block_chunk*) allocate_pop_register();
             
             if (sinavm_flowcontrol_get(vm))
@@ -116,6 +115,7 @@ void interpret_chunk(sinavm_data* vm, chunk_header* header)
 	if (sinavm_trace_get(vm))
 	{
 		printf("interpret_chunk: done.\n");
+		pprint(vm->ds); printf("\n:)%d\n", sinavm_list_empty(vm->cs));
 	}
 }
 

@@ -8,9 +8,10 @@ int sina_allocator_next_free_register = 0;
 /* add chunk to list of chunks that might get reallocated */
 void allocate_push_register(chunk_header* chunk)
 {
-    error_assert(sina_allocator_next_free_register < SINA_ALLOCATOR_MAX_REGISTERS,
+    error_assert(sina_allocator_next_free_register < 
+		SINA_ALLOCATOR_MAX_REGISTERS,
         "allocate_push_register: registers full\n");
-    
+   	
     sina_allocator_register[sina_allocator_next_free_register++] = chunk;
 }
 
@@ -21,6 +22,6 @@ chunk_header* allocate_pop_register()
 {
     error_assert(sina_allocator_next_free_register > 0,
         "allocate_pop_register: cannot pop empty stack\n");
-    
-    return sina_allocator_register[--sina_allocator_next_free_register];
+   
+   	return sina_allocator_register[ --sina_allocator_next_free_register];
 }
