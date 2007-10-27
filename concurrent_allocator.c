@@ -69,8 +69,10 @@ void allocate_heap(sinavm_data* _vm, size_t size)
 	collector_list = allocate_chunk_list(heap + count_chunks / 2, 
 		count_chunks / 2);
 
-	printf("allocate_heap: allocated chunk lists\n");
-	collector_print_heap();
+	if (sinavm_trace_get(vm))
+	{	
+		printf("allocate_heap: allocated chunk lists\n");
+	}
 
 	/* set up hooks for monitoring changes made by monitor
 	 * (in essence, anytime a list gets pushed / popped, darken the
@@ -78,12 +80,12 @@ void allocate_heap(sinavm_data* _vm, size_t size)
 	 */
 	sinavm_push_front_hook = mutator_push_hook;
 	sinavm_push_back_hook  = mutator_push_hook;
+	sinavm_pop_front_to_register_hook = mutator_pop_register_hook;
 
 	/* start the collector thread */
-	pthread_t collector_thread;
+	pthread_t collector_thread = NULL;
 	int rc = pthread_create(&collector_thread, NULL, collector_main, NULL);
 	error_assert(rc == 0, "allocate_heap: failed to create collector thread\n");
-	printf("allocate_heap: started collector thread\n");
 	collector_print_heap();
 }
 
@@ -96,7 +98,11 @@ void* allocate_chunk(int type)
 {
 	if (NULL == free_list)
 	{
-		printf("allocate_chunk: free_list empty\n");
+		if (sinavm_trace_get(vm))
+		{
+			printf("allocate_chunk: free_list empty\n");
+		}
+
 		mutator_await_free_list(); /* crashes if not successfull */	
 	}
 	error_assert(NULL != free_list, "allocate_chunk: free_list empty\n");
@@ -141,15 +147,17 @@ void mutator_await_free_list()
 	int tries = 0; 
 	while (tries < 2)
 	{
-		printf("mutator_await_free_list: tries = %d\n", tries);
+		if (sinavm_trace_get(vm))
+		{
+			printf("mutator_await_free_list: tries = %d\n", tries);
+		}
+		
 		pthread_mutex_lock(&mutex_freelist_empty);
 		error_assert(0 == flag_freelist_empty,
 			"mutator_await_free_list: expected flag_freelist_empty = 0\n");
 		flag_freelist_empty = 1;
 		/* collector might be waiting for this */
-		printf("mutator_await_free_list: signaling cond_freelist_empty\n");
 		pthread_cond_signal(&cond_freelist_empty); 
-		printf("mutator_await_free_list: signaled cond_freelist_empty\n");
 		/* collector mustn't signal before wait */
 		pthread_mutex_lock(&mutex_freelist_ready); 
 		/* let collector wake up / read flag */
@@ -174,7 +182,10 @@ void mutator_await_free_list()
 	else
 	{
 		/* all is well, free chunks were found and added to free_list */
-		printf("mutator_await_free_list: free_list recieved\n");
+		if (sinavm_trace_get(vm))
+		{
+			printf("mutator_await_free_list: free_list recieved\n");
+		}
 		return;
 	}
 }
@@ -190,6 +201,16 @@ list_head_chunk* mutator_push_hook(list_head_chunk* list, chunk_header* data)
 	return list;
 }
 
+list_head_chunk* mutator_pop_register_hook(list_head_chunk* list)
+{
+	if (!sinavm_list_empty(list))
+	{
+		chunk_header* chunk = list->first->data;
+		chunk->colour = grey_value;
+	}
+	return list;
+}
+
 /* wait for signal to fill free_list with the nodes in collector_list, then
  * start collecting collector_list, repeat.
  * 
@@ -200,7 +221,10 @@ void* collector_main(void* args)
 {
 	while (1) /* loop forever */
 	{
-		printf("collector_main: waiting for freelist_empty\n");
+		if (sinavm_trace_get(vm))
+		{
+			printf("collector_main: waiting for freelist_empty\n");
+		}
 		pthread_mutex_lock(&mutex_freelist_empty);
 		if(1 != flag_freelist_empty)
 		{
@@ -209,7 +233,12 @@ void* collector_main(void* args)
 			error_assert(1 == flag_freelist_empty, 
 				"collector_main: expeced flag_freelist_empty = 1\n");
 		}
-		printf("collector_main: free_list is empty\n");
+
+		if (sinavm_trace_get(vm))
+		{
+			printf("collector_main: free_list is empty\n");
+		}
+
 		collector_print_heap();
 		flag_freelist_empty = 0; /* we now know the list was empty */
 		pthread_mutex_unlock(&mutex_freelist_empty);
@@ -222,19 +251,28 @@ void* collector_main(void* args)
 		/* assign free_list */
 		free_list      = collector_list;
 		collector_list = NULL;
-		printf("collector_main: assigned free_list\n");
+
+		if (sinavm_trace_get(vm))
+		{
+			printf("collector_main: assigned free_list\n");
+		}
 
 		/* swap colours */
 		int temp = black_value;
 		black_value = white_value;
 		white_value = temp;
-		printf("collector_main: swapped colours, black is now %d\n",
-			black_value);
-		collector_print_heap();
+
+		if (sinavm_trace_get(vm))
+		{
+			printf("collector_main: swapped colours, black is now %d\n",
+				black_value);
+		}
 
 		/* BUG FIX: any chunks in the registers might not be accessible
 		   and have just been coloured white (by swapping colours).
 		   Colour them grey to be sure the are not collected.
+		   We know the registry is not being altered at the moment,
+		   since the mutator is waiting for the freelist. 
 		 */
 		collector_colour_registers_grey();
 
@@ -253,7 +291,11 @@ void* collector_main(void* args)
  */
 void collector_collect_garbage()
 {
-	printf("collector_collect_garbage: collecting garbage\n");
+	if (sinavm_trace_get(vm))
+	{
+		printf("collector_collect_garbage: collecting garbage\n");
+	}
+
 	collector_mark_root_chunks_grey();
 
 	chunk_header* chunk = (chunk_header*) heap;
@@ -324,9 +366,11 @@ chunk_header* collector_find_grey_chunk(chunk_header* chunk)
 			}
 		}
 		/* cycled through all chunks in heap, c == chunk */
-		printf("collector_find_grey_chunk: could not find any grey chunks "
+		if (sinavm_trace_get(vm))
+		{
+			printf("collector_find_grey_chunk: could not find any grey chunks "
 			   "in heap...\n");
-		collector_print_heap();
+		}
 		return NULL;
 	}
 }
@@ -350,6 +394,7 @@ void collector_darken_successors(chunk_header* chunk)
 		case SYMBOL_CHUNK:
 		case ESCAPED_SYMBOL_CHUNK:
 		case NATIVE_CHUNK:
+		case FREE_CHUNK:
 			/* do nothing */
 			break;
 
@@ -407,7 +452,11 @@ void collector_darken_chunk(chunk_header* chunk)
  */
 void collector_build_collector_list()
 {
-	printf("collector_build_collector_list: begin\n");
+	if (sinavm_trace_get(vm))
+	{
+		printf("collector_build_collector_list: begin\n");
+	}
+	
 	free_chunk* chunk = NULL;
 	free_chunk* end_of_heap = heap + count_chunks;
 
@@ -425,7 +474,11 @@ void collector_build_collector_list()
 			collector_list = chunk;
 		}
 	}
-	printf("collector_build_collector_list: end\n");
+
+	if (sinavm_trace_get(vm))
+	{
+		printf("collector_build_collector_list: end\n");
+	}
 }
 
 void collector_colour_registers_grey()
