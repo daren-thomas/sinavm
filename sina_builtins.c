@@ -204,6 +204,7 @@ void list_is_empty(sinavm_data* vm)
 void read_line(sinavm_data* vm)
 {
 	list_head_chunk* list = sinavm_new_list();
+	allocate_push_register((chunk_header*) list);
 	int c;
 	while (EOF != (c = getchar()))
 	{
@@ -219,6 +220,7 @@ void read_line(sinavm_data* vm)
 		}
 	}
 	sinavm_push_front(vm->ds, (chunk_header*) list);
+	allocate_pop_register();
 }
 
 /* print a list of integers as a series of characters,
