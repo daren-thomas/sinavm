@@ -145,7 +145,7 @@ free_chunk* allocate_chunk_list(free_chunk* h, size_t n)
 void mutator_await_free_list()
 {
 	int tries = 0; 
-	while (tries < 2)
+	while (tries++ < 2)
 	{
 		if (sinavm_trace_get(vm))
 		{
