@@ -114,7 +114,7 @@ void* allocate_chunk(int type)
 	result->next = NULL; /* clean up memory, this can be omitted */
 	result->data = NULL;
 
-	result->header.colour = grey_value;
+	result->header.colour = green_value;
 	result->header.type = type;
 	return result;
 }
@@ -197,7 +197,14 @@ list_head_chunk* mutator_push_hook(list_head_chunk* list, chunk_header* data)
 {
 	collector_darken_chunk((chunk_header*) list);
 	collector_darken_successors((chunk_header*) list);
-	collector_darken_chunk((chunk_header*) data);
+	if (list == vm->ds || list == vm->cs)
+	{
+		// possibly adding a new chunk, must be black
+		data->colour = black_value;
+	else
+	{
+		collector_darken_chunk((chunk_header*) data);
+	}
 	return list;
 }
 

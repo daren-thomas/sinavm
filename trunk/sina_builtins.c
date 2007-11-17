@@ -258,6 +258,7 @@ void print_int(sinavm_data* vm)
 		"print-int: expected integer\n");
 
 	integer_chunk* i = (integer_chunk*) sinavm_pop_front_to_register(vm->ds);
+	putchar(i->value);
 	allocate_pop_register();
 }
 

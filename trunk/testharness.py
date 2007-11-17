@@ -7,11 +7,11 @@
 
 import os, time
 
-heap_sizes = [2**n * 1024 for n in range(1, 8)]
+heap_sizes = [2**n * 1024 for n in range(1, 16)]
 
 # input files vary in linecount and linelength
-LINE_COUNT_SMALL, LINE_COUNT_BIG = 1000, 100000
-LINE_SIZE_SMALL, LINE_SIZE_MEDIUM, LINE_SIZE_BIG = 10, 100, 1000
+LINE_COUNT_SMALL, LINE_COUNT_BIG = 1000, 10000
+LINE_SIZE_SMALL, LINE_SIZE_MEDIUM, LINE_SIZE_BIG = 10, 100, 500
 files = [
     (LINE_COUNT_SMALL, LINE_SIZE_SMALL),
     (LINE_COUNT_SMALL, LINE_SIZE_MEDIUM),
