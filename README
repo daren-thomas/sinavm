@@ -1,0 +1,46 @@
+A brief description of the project
+==================================
+
+Sinavm is an implementation of a postfix list programming language. It was written to contrast two separate garbage collector algorithms: TwoSpace and the on-the-fly garbage collection algorithm described by Prof. E. W. Dijkstra et al.
+
+This project can be found at http://sinavm.googlecode.com
+
+Notes on the developer's build environment and potential portability problems
+=============================================================================
+
+This project has been built and tested on Cygwin for Windows and Mac OS X. It should also run on Debian systems (although there might be a small warning during compilation of concurrent_allocator.c - I have tried to fix this bug, bug cannot test it as I don't have access to a Debian machine at the moment).
+
+This project requires GNU make, the GNU C Compiler, flex, bison and an implementation of the PThreads Library. You might have to alter the make file to link libraries differently on your system.
+
+INSTALL
+=======
+
+You can't really install this project, only build it (there is no target "install" in the Makefile).
+
+A simple make with the concurrent allocator could look like this:
+
+% make HEAP_SIZE=4096
+
+To really exercise the interpreter (and also execute some sina code), try:
+
+% python testharness.py
+
+A roadmap describing important files and subdirectories
+=======================================================
+
+main.c - implements the system entry point.
+
+testharness.py - builds the project (varying the GC and heap size) and executes the test algorithm (cesar_shift.sina)
+
+sina_types.h - describes the main types used throughout the project.
+
+sinavm.h - describes the interface to the Sina Virtual Machine.
+
+sina_builtins.c - implementations of all the built in functions in the sina programming language.
+
+Semesterarbeit_Concurrent_GC.pdf - documents the whole project and has a more complete list of the files used in this project (german).
+
+License
+=======
+
+Due to restrictions on using bison, this project is under the GPL Version 2. The license can be viewed here: http://www.gnu.org/licenses/gpl-2.0.html.
