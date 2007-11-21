@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?> 
-<java version="1.5.0_07" class="java.beans.XMLDecoder"> 
+<java version="1.5.0_06" class="java.beans.XMLDecoder"> 
  <object class="com.horstmann.violet.ClassDiagramGraph"> 
   <void method="addNode"> 
    <object id="ClassNode0" class="com.horstmann.violet.ClassNode"> 
@@ -62,7 +62,7 @@ sinavm_pop_front()
     </void> 
     <void property="name"> 
      <void property="text"> 
-      <string>Virtual Maschine</string> 
+      <string>Virtual Machine</string> 
      </void> 
     </void> 
    </object> 
