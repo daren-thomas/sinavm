@@ -104,7 +104,7 @@ symbols_find(id): name</string>
    </object> 
    <object class="java.awt.geom.Point2D$Double"> 
     <void method="setLocation"> 
-     <double>700.0</double> 
+     <double>680.0</double> 
      <double>360.0</double> 
     </void> 
    </object> 
