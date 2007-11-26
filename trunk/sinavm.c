@@ -99,6 +99,12 @@ list_head_chunk* sinavm_push_front(list_head_chunk* list, chunk_header* data)
     node->data = data;
     node->next = list->first;
     list->first = node;
+
+	/* node might be green (for concurrent gc) */
+	if (sinavm_push_front_hook)
+	{
+		list = sinavm_push_front_hook(list, node);
+	}
     
     if (list->last == NULL)
     {
