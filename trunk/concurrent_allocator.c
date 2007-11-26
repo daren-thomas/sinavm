@@ -11,6 +11,7 @@
  * The "allocate_*" functions are called by the sinavm and are run in the 
  * mutator (=main) thread.
  */
+
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
