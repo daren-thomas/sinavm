@@ -25,6 +25,8 @@ To really exercise the interpreter (and also execute some sina code), try:
 
 % python testharness.py
 
+You will want to do a "tail -f results.csv" to view the progress of the testharness. Whenever a configuration (heap size / input file size) can't be computed or in the event of a failing build, you will have to press [ENTER] to start the next configuration.
+
 A roadmap describing important files and subdirectories
 =======================================================
 
