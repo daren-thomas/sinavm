@@ -78,8 +78,8 @@ void allocate_heap(sinavm_data* _vm, size_t size)
 	 * (in essence, anytime a list gets pushed / popped, darken the
 	 * list and the node to be appended to. Also darken the data being pushed
 	 */
-	sinavm_push_front_hook = mutator_push_hook;
-	sinavm_push_back_hook  = mutator_push_hook;
+	sinavm_push_front_hook = mutator_push_hook; 
+	sinavm_push_back_hook  = mutator_push_hook; 
 	sinavm_pop_front_to_register_hook = mutator_pop_register_hook;
 
 	/* start the collector thread */
@@ -114,7 +114,7 @@ void* allocate_chunk(int type)
 	result->next = NULL; /* clean up memory, this can be omitted */
 	result->data = NULL;
 
-	result->header.colour = grey_value;
+	result->header.colour = green_value;
 	result->header.type = type;
 	return result;
 }
@@ -195,9 +195,20 @@ void mutator_await_free_list()
  */
 list_head_chunk* mutator_push_hook(list_head_chunk* list, chunk_header* data)
 {
-	collector_darken_chunk((chunk_header*) list);
-	collector_darken_successors((chunk_header*) list);
-	collector_darken_chunk((chunk_header*) data);
+	if (green_value == data->colour)
+	{
+		/* new chunk being added to root set. make it black */
+		collector_darken_successors(data);
+		collector_darken_chunk(list);
+		collector_darken_successors(list);
+		data->colour = black_value;
+	}
+	else
+	{
+		collector_darken_chunk((chunk_header*) list);
+		collector_darken_successors((chunk_header*) list);
+		collector_darken_chunk((chunk_header*) data);
+	}
 	return list;
 }
 
@@ -206,7 +217,7 @@ list_head_chunk* mutator_pop_register_hook(list_head_chunk* list)
 	if (!sinavm_list_empty(list))
 	{
 		chunk_header* chunk = list->first->data;
-		chunk->colour = grey_value;
+		collector_darken_chunk(chunk);
 	}
 	return list;
 }
@@ -424,7 +435,7 @@ void collector_darken_chunk(chunk_header* chunk)
 {
 	if (NULL != chunk)
 	{
-		if (white_value == chunk->colour)
+		if (white_value == chunk->colour || green_value == chunk->colour)
 		{
 			chunk->colour = grey_value;	
 		}
