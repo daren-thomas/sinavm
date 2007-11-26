@@ -11,7 +11,7 @@ heap_sizes = [2**n * 1024 for n in range(1, 16)]
 
 # input files vary in linecount and linelength
 #LINE_COUNT_SMALL, LINE_COUNT_BIG = 1000, 10000
-LINE_COUNT_SMALL = 1000
+LINE_COUNT_SMALL, LINE_COUNT_BIG = 500, 1000
 LINE_SIZE_SMALL, LINE_SIZE_MEDIUM, LINE_SIZE_BIG = 10, 100, 500
 files = [
     (LINE_COUNT_SMALL, LINE_SIZE_SMALL),
@@ -41,7 +41,7 @@ def time_execution(allocator, file, heap):
         return end_time - start_time
     else:
         # wait so user can read error messages
-        raw_input("Please continue with [ENTER]")
+        #raw_input("Please continue with [ENTER]")
         return None
 
 def create_file(line_count, line_size):
