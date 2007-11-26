@@ -359,16 +359,21 @@ chunk_header* collector_find_grey_chunk(chunk_header* chunk)
 	}
 	else
 	{
-		while (++c != (free_chunk*) chunk)
+		/* check heap multiple times, just to be sure */
+		int i;
+		for (i = 0; i < 3; ++i)
 		{
-			if (c >= end_of_heap)
+			while (++c != (free_chunk*) chunk)
 			{
-				c = heap;
-			}
+				if (c >= end_of_heap)
+				{
+					c = heap;
+				}
 
-			if (grey_value == c->header.colour)
-			{
-				return (chunk_header*) c;
+				if (grey_value == c->header.colour)
+				{
+					return (chunk_header*) c;
+				}
 			}
 		}
 		/* cycled through all chunks in heap, c == chunk */
