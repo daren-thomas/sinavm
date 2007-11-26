@@ -32,7 +32,7 @@ def time_execution(allocator, file, heap):
     result = os.system(make_command % (heap, allocator))
     if result:
         # wait so user can read error messages
-        raw_input()
+        raw_input("Please continue with [ENTER]")
     start_time = time.time()
     result = os.system(run_command % input_file)
     end_time = time.time()
@@ -40,7 +40,7 @@ def time_execution(allocator, file, heap):
         return end_time - start_time
     else:
         # wait so user can read error messages
-        raw_input()
+        raw_input("Please continue with [ENTER]")
         return None
 
 def create_file(line_count, line_size):
