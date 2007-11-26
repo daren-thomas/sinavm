@@ -150,7 +150,8 @@ Allocator</string>
    <object id="ClassNode6" class="com.horstmann.violet.ClassNode"> 
     <void property="name"> 
      <void property="text"> 
-      <string>SimpleGC</string> 
+      <string>Simple
+Allocator</string> 
      </void> 
     </void> 
    </object> 
