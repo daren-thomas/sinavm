@@ -113,7 +113,8 @@ void* allocate_chunk(int type)
 
 	result->next = NULL; /* clean up memory, this can be omitted */
 	result->data = NULL;
-	result->header.colour = black_value;
+
+	result->header.colour = grey_value;
 	result->header.type = type;
 	return result;
 }
@@ -196,8 +197,8 @@ list_head_chunk* mutator_push_hook(list_head_chunk* list, chunk_header* data)
 {
 	collector_darken_chunk((chunk_header*) list);
 	collector_darken_successors((chunk_header*) list);
-	collector_darken_chunk( data);
-    return list;
+	collector_darken_chunk((chunk_header*) data);
+	return list;
 }
 
 list_head_chunk* mutator_pop_register_hook(list_head_chunk* list)
